@@ -12,8 +12,6 @@
  * When we test your server, we will be using modifications to this client.
  *
  */
-
-
 #include <stdio.h>
 #include <pthread.h>
 #include <assert.h>

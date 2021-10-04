@@ -15,22 +15,22 @@ LIBS = -lpthread
 all: server clientPost clientGet dataGet.cgi dataPost.cgi
 
 server: server.o request.o stems.o
-	$(CC) $(CFLAGS) -o server server.o request.o stems.o $(LIBS)
+	$(CC) $(CFLAGS) -w -o server server.o request.o stems.o $(LIBS)
 
 clientGet: clientGet.o stems.o
-	$(CC) $(CFLAGS) -o clientGet clientGet.o stems.o
+	$(CC) $(CFLAGS) -w -o clientGet clientGet.o stems.o
 
 clientPost: clientPost.o stems.o
-	$(CC) $(CFLAGS) -o clientPost clientPost.o stems.o $(LIBS)
+	$(CC) $(CFLAGS) -w -o clientPost clientPost.o stems.o $(LIBS)
 
 dataGet.cgi: dataGet.c stems.h
-	$(CC) $(CFLAGS) -o dataGet.cgi dataGet.c
+	$(CC) $(CFLAGS) -w -o dataGet.cgi dataGet.c
 
 dataPost.cgi: dataPost.c stems.h
-	$(CC) $(CFLAGS) -o dataPost.cgi dataPost.c
+	$(CC) $(CFLAGS) -w -o dataPost.cgi dataPost.c
 
 .c.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -w -o $@ -c $<
 
 server.o: stems.h request.h
 clientGet.o: stems.h

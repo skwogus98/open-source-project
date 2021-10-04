@@ -2,7 +2,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <unistd.h>
-
+#define _CRT_SECURE_NO_WARNINGS
 //
 // This program is intended to help you test your web server.
 // 

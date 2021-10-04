@@ -70,6 +70,7 @@ pid_t Wait(int *status);
 
 int Gethostname(char *name, size_t len) ;
 int Setenv(const char *name, const char *value, int overwrite);
+char* Getenv(const char *name);
 
 /* Unix I/O wrappers */
 int Open(const char *pathname, int flags, mode_t mode);

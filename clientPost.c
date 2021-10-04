@@ -8,7 +8,6 @@
  * Get the HTTP response.
  */
 
-
 #include <stdio.h>
 #include <pthread.h>
 #include <assert.h>

@@ -49,6 +49,16 @@ int Setenv(const char *name, const char *value, int overwrite)
         unix_error("Setenv error");
     return rc;
 }
+//////////////////////추가함///////////////
+char* Getenv(const char *name)
+{
+    char* rc;
+
+    if ((rc = getenv(name)) == NULL)
+        unix_error("Getenv error");
+    return rc;
+}
+///////////////////////////
 
 /*********************************************
  * Wrappers for Unix process control functions

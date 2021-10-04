@@ -2,6 +2,8 @@
 // request.c: Does the bulk of the work for the web server.
 // 
 
+
+
 #include "stems.h"
 #include "request.h"
 
@@ -132,7 +134,7 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
 
   if (bodyLength > 0){
     Rio_readlineb(rio, cgiargs, bodyLength+1);
-    printf("%s\n", cgiargs);
+    printf("%s\n", cgiargs);//여기가 인자 출력
   }
   
   sprintf(buf, "HTTP/1.0 200 OK\r\n");
@@ -140,8 +142,33 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   sprintf(buf, "%sContent-Length: %d\r\n", buf, strlen(astr));
   sprintf(buf, "%sContent-Type: text/plain\r\n", buf);
   sprintf(buf, "%sStat-req-arrival: %lf\r\n\r\n", buf, arrivalTime);
-  sprintf(buf, "%s%s\r\n", buf, astr);
+  //sprintf(buf, "%s%s\r\n", buf, astr);
+
+  /////수정점
+  Setenv("QUERY_STRING", "hello world", 1);
+  dataGet(filename);
+  ////////////
+
   Rio_writen(fd, buf, strlen(buf));
+
+}
+
+void dataGet(char* filename){
+  int res;
+  int pid = fork();
+  if (pid == 0){
+  /* do child job */
+    Execve(filename, NULL, environ);
+    exit(5);
+  } else if (pid > 0) {
+  /* do parent job */
+    wait(&res);
+
+    printf("Parent: child done with %d.\n", res >> 8);
+  } else {
+    fprintf(stderr, "fork failed.\n");
+    exit(1);
+  }
 }
 
 
@@ -218,6 +245,7 @@ void requestHandle(int connfd, double arrivalTime)
       return;
     }
     requestServeDynamic(&rio, connfd, filename, cgiargs, bodyLength, arrivalTime);//에러가 없을 시 출력
+    printf(cgiargs);
   }
 
 }
