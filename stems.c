@@ -92,6 +92,14 @@ pid_t Wait(int *status)
 }
 /* $end wait */
 
+int Pipe(int pdf) 
+{
+    int pip;
+    if ((pip  = pipe(pdf)) < 0)
+        unix_error("Pipe error");
+    return pip;
+}
+
 /********************************
  * Wrappers for Unix I/O routines
  ********************************/

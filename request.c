@@ -145,26 +145,40 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   //sprintf(buf, "%s%s\r\n", buf, astr);
 
   /////수정점
-  Setenv("QUERY_STRING", "hello world", 1);
-  dataGet(filename);
+  Setenv("QUERY_STRING", "hello world!", 1);
+  int pfd[2];//pipe
+
+  dataGet(filename, fd, pfd);
   ////////////
 
   Rio_writen(fd, buf, strlen(buf));
 
 }
 
-void dataGet(char* filename){
+void dataGet(char* filename, int connfd, int pfd[2]){
   int res;
+  char response[MAXBUF];
   int pid = fork();
   if (pid == 0){
-  /* do child job */
+    /* do child job */
+    Dup2(connfd, STDOUT_FILENO);
     Execve(filename, NULL, environ);
-    exit(5);
   } else if (pid > 0) {
-  /* do parent job */
+    /* do parent job */
     wait(&res);
+    /*
+    int srcfd;
+    char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
-    printf("Parent: child done with %d.\n", res >> 8);
+    requestGetFiletype(filename, filetype);
+    srcfd = Open(filename, O_RDONLY, 0);
+    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
+    Close(srcfd);
+    Rio_writen(connfd, buf, strlen(buf));
+    Rio_writen(connfd, srcp, filesize);
+    Munmap(srcp, filesize);*/
+
+
   } else {
     fprintf(stderr, "fork failed.\n");
     exit(1);
@@ -218,7 +232,7 @@ void requestHandle(int connfd, double arrivalTime)
   Rio_readlineb(&rio, buf, MAXLINE);//rio의 첫번째 line을 buf에 저장
   sscanf(buf, "%s %s %s", method, uri, version);
   printf("%s %s %s\n", method, uri, version);//buf에서 method uri version을 가져옴
-  
+
   requestReadhdrs(&rio, &bodyLength);//contents length를 가져옴
   reqType = parseURI(uri, filename, cgiargs);//데이터 파싱
   if ((strcasecmp(method, "GET")!=0)&&(strcasecmp(method,"POST")!=0)){
@@ -245,7 +259,6 @@ void requestHandle(int connfd, double arrivalTime)
       return;
     }
     requestServeDynamic(&rio, connfd, filename, cgiargs, bodyLength, arrivalTime);//에러가 없을 시 출력
-    printf(cgiargs);
   }
 
 }
