@@ -172,7 +172,7 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   Rio_writen(fd, buf, strlen(buf));
 
 }
-
+///fork로 cgi프로그램 실행
 void exeCgi(char* filename, int connfd, int pfd[2], double arrivalTime){
   int res;
   char response[MAXBUF];
@@ -180,7 +180,7 @@ void exeCgi(char* filename, int connfd, int pfd[2], double arrivalTime){
   if (pid == 0){
     /* do child job */
     Dup2(pfd[0], STDIN_FILENO);
-    Dup2(connfd, STDOUT_FILENO);
+    Dup2(connfd, STDOUT_FILENO);//io 설정
     Execve(filename, NULL, environ);
   } else if (pid > 0) {
     /* do parent job */
