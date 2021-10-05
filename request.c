@@ -93,6 +93,15 @@ int parseURI(char *uri, char *filename, char *cgiargs)
     }
     return STATIC;
   } else {
+    char *ptr = index(uri, "?");
+    if (ptr) {
+       strcpy (cgiargs, ptr+1);
+       strncpy(filename, uri, ptr-1);
+       ptr = NULL; 
+     } 
+       printf("cgiargs : %s\n",cgiargs);
+       printf("filename : %s\n", filename);
+
     // dynamic
     /* seperate a uri to a filename and a cgiargs. For example,
        if uri is "/output.cgi?100&TEST" then filename is 
