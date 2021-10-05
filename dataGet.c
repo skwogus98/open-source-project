@@ -71,7 +71,7 @@ void textReturn(void)
 
 int main(void)
 {
-  //htmlReturn();
-  textReturn();
+  htmlReturn();
+  //textReturn();
   return(0);
 }

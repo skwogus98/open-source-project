@@ -95,14 +95,14 @@ int parseURI(char *uri, char *filename, char *cgiargs)
   } else {
     if(strstr(uri, "?")){
       char *ptr =strtok(uri, "?");
-      strcpy(filename, ptr);
+      sprintf(filename, "./%s", ptr);
       ptr =strtok(NULL, "?");
-      strcpy(cgiargs,ptr);
+      strcpy(cgiargs, ptr);
       printf("cgiargs : %s\n",cgiargs);
       printf("filename : %s\n", filename);
     }
     else{
-      strcpy(filename,uri);
+      sprintf(filename, "./%s", uri);
     }
 
     // dynamic
@@ -115,7 +115,7 @@ int parseURI(char *uri, char *filename, char *cgiargs)
     // ..
 
     // following codes are dummy which should be deleted later
-    sprintf(filename, "./%s", uri);
+    //sprintf(filename, "./%s", uri);
     return DYNAMIC;
   }
 }
