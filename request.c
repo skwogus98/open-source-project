@@ -93,14 +93,17 @@ int parseURI(char *uri, char *filename, char *cgiargs)
     }
     return STATIC;
   } else {
-    char *ptr = index(uri, "?");
-    if (ptr) {
-       strcpy (cgiargs, ptr+1);
-       strncpy(filename, uri, ptr-1);
-       ptr = NULL; 
-     } 
-       printf("cgiargs : %s\n",cgiargs);
-       printf("filename : %s\n", filename);
+    if(strstr(uri, "?")){
+      char *ptr =strtok(uri, "?");
+      strcpy(filename, ptr);
+      ptr =strtok(NULL, "?");
+      strcpy(cgiargs,ptr);
+      printf("cgiargs : %s\n",cgiargs);
+      printf("filename : %s\n", filename);
+    }
+    else{
+      strcpy(filename,uri);
+    }
 
     // dynamic
     /* seperate a uri to a filename and a cgiargs. For example,
@@ -161,7 +164,7 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   //sprintf(buf, "%s%s\r\n", buf, astr);
 
   /////수정점
-  Setenv("QUERY_STRING", "hello world!", 1);
+  Setenv("QUERY_STRING", cgiargs, 1);
 
   exeCgi(filename, fd, pfd, arrivalTime);
   ////////////
@@ -182,28 +185,6 @@ void exeCgi(char* filename, int connfd, int pfd[2], double arrivalTime){
   } else if (pid > 0) {
     /* do parent job */
     wait(&res);
-    /*
-    int resfd;
-    char res[MAXBUF], buf[MAXBUF];
-
-    resfd = Read(connfd, res, MAXBUF);
-
-    sprintf(buf, "HTTP/1.0 200 OK\r\n");
-    sprintf(buf, "%sServer: My Web Server\r\n", buf);
-
-    // Your statistics go here -- fill in the 0's with something useful!
-    sprintf(buf, "%sStat-req-arrival: %lf\r\n", buf, arrivalTime);
-    // Add additional statistic information here like above
-    // ...
-    //
-    
-    sprintf(buf, "%sContent-Length: %d\r\n", buf, strlen(res));
-    sprintf(buf, "%sContent-Type: cgi\r\n\r\n", buf);
-
-    Rio_writen(connfd, buf, strlen(buf));
-    Rio_writen(connfd, res, strlen(res));
-    //Rio_writen(connfd, resp, strlen(buf)+1);
-    */
 
   } else {
     fprintf(stderr, "fork failed.\n");
