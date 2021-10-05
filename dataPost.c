@@ -9,7 +9,9 @@
 
 int main(int argc, char *argv[])
 {
-  char *astr = "Currently, CGI program is running, but argument passing is not implemented.";
+  char astr[MAXBUF];
+  
+  read(STDIN_FILENO, astr, MAXBUF);
   
   printf("HTTP/1.0 200 OK\r\n");
   printf("Server: My Web Server\r\n");

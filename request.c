@@ -131,10 +131,17 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   //
   char buf[MAXLINE];
   char astr[MAXLINE] = "Current version does not support CGI program.";
+  int pfd[2];//pipe
+  if (pipe(pfd) < 0){
+    fprintf(stderr, "pipe failed:%s\n", strerror(errno));
+    exit(1);
+  }
 
   if (bodyLength > 0){
     Rio_readlineb(rio, cgiargs, bodyLength+1);
     printf("%s\n", cgiargs);//여기가 인자 출력
+    //수정 시작
+    Write(pfd[1], cgiargs, strlen(cgiargs)+1);
   }
   
   sprintf(buf, "HTTP/1.0 200 OK\r\n");
@@ -146,38 +153,48 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
 
   /////수정점
   Setenv("QUERY_STRING", "hello world!", 1);
-  int pfd[2];//pipe
 
-  dataGet(filename, fd, pfd);
+  exeCgi(filename, fd, pfd, arrivalTime);
   ////////////
 
   Rio_writen(fd, buf, strlen(buf));
 
 }
 
-void dataGet(char* filename, int connfd, int pfd[2]){
+void exeCgi(char* filename, int connfd, int pfd[2], double arrivalTime){
   int res;
   char response[MAXBUF];
   int pid = fork();
   if (pid == 0){
     /* do child job */
+    Dup2(pfd[0], STDIN_FILENO);
     Dup2(connfd, STDOUT_FILENO);
     Execve(filename, NULL, environ);
   } else if (pid > 0) {
     /* do parent job */
     wait(&res);
     /*
-    int srcfd;
-    char *srcp, filetype[MAXLINE], buf[MAXBUF];
+    int resfd;
+    char res[MAXBUF], buf[MAXBUF];
 
-    requestGetFiletype(filename, filetype);
-    srcfd = Open(filename, O_RDONLY, 0);
-    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
-    Close(srcfd);
+    resfd = Read(connfd, res, MAXBUF);
+
+    sprintf(buf, "HTTP/1.0 200 OK\r\n");
+    sprintf(buf, "%sServer: My Web Server\r\n", buf);
+
+    // Your statistics go here -- fill in the 0's with something useful!
+    sprintf(buf, "%sStat-req-arrival: %lf\r\n", buf, arrivalTime);
+    // Add additional statistic information here like above
+    // ...
+    //
+    
+    sprintf(buf, "%sContent-Length: %d\r\n", buf, strlen(res));
+    sprintf(buf, "%sContent-Type: cgi\r\n\r\n", buf);
+
     Rio_writen(connfd, buf, strlen(buf));
-    Rio_writen(connfd, srcp, filesize);
-    Munmap(srcp, filesize);*/
-
+    Rio_writen(connfd, res, strlen(res));
+    //Rio_writen(connfd, resp, strlen(buf)+1);
+    */
 
   } else {
     fprintf(stderr, "fork failed.\n");
