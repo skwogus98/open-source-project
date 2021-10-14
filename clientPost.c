@@ -31,22 +31,23 @@ void clientSend(int fd, char *filename, char *body)
   sprintf(buf, "%s%s\n", buf, body);
   Rio_writen(fd, buf, strlen(buf));
 }
-  
+
 /*
  * Read the HTTP response and print it out
  */
 void clientPrint(int fd)
 {
   rio_t rio;
-  char buf[MAXBUF];  
+  char buf[MAXBUF];
   int length = 0;
   int n;
-  
+
   Rio_readinitb(&rio, fd);
 
   /* Read and display the HTTP Header */
   n = Rio_readlineb(&rio, buf, MAXBUF);
-  while (strcmp(buf, "\r\n") && (n > 0)) {
+  while (strcmp(buf, "\r\n") && (n > 0))
+  {
     /* If you want to look for certain HTTP tags... */
     if (sscanf(buf, "Content-Length: %d ", &length) == 1)
       printf("Length = %d\n", length);
@@ -56,7 +57,8 @@ void clientPrint(int fd)
 
   /* Read and display the HTTP Body */
   n = Rio_readlineb(&rio, buf, MAXBUF);
-  while (n > 0) {
+  while (n > 0)
+  {
     printf("%s", buf);
     n = Rio_readlineb(&rio, buf, MAXBUF);
   }
@@ -67,11 +69,81 @@ void userTask(char *myname, char *hostname, int port, char *filename, float time
 {
   int clientfd;
   char msg[MAXLINE];
+  char input[MAXLINE] int n;
+  int random;
+  srand(time(NULL));
 
-  sprintf(msg, "name=%s&time=%f&value=%f", myname, time, value);
-  clientfd = Open_clientfd(hostname, port);
-  clientSend(clientfd, filename, msg);
-  clientPrint(clientfd);
+  printf("if you want to see command, type 'help'");
+
+  while (1)
+  {
+    printf(">>");
+    scanf("%s", &input);
+    if (!strcmp(input, "help"))
+    {
+      printf("help: list available commands.\n");
+      printf("name: print current sensor name.\n");
+      printf("name <sensor>: change sensor name to sensor\n");
+      printf("value: print current value of sensor.\n");
+      printf("value <n>: set sensor value to <n>\n");
+      printf("send: send (currnet sensor name, time, value) to server\n");
+      printf("random <n>: send (name, time , random value) to server <n> times\n");
+      printf("quit: quit the program\n");
+    }
+    else if (!strncmp(input, "name", 4)))
+      {
+        if (!strcmp(input, "name"))
+        {
+          printf("Current sensor is %s \n", myname);
+        }
+        else
+        {
+          printf("%s\n", input);
+          sscanf(input, "name %s", myname);
+          printf("Sensor name is changed to '%s'\n", myname);
+        }
+      }
+    else if (!strncmp(input, "value", 5)))
+      {
+        if (!strcmp(input, "value"))
+        {
+          printf("Current value of sensor is %f \n", value);
+        }
+        else
+        {
+          printf("%s\n", input);
+          sscanf(input, "value %s", n);
+          value = atof(n);
+          printf("Sensor name is changed to '%s'\n", value);
+        }
+      }
+    else if (!strcmp(input, "send"))
+    {
+      sprintf(msg, "name=%s&time=%f&value=%f", myname, time, value);
+      clientfd = Open_clientfd(hostname, port);
+      clientSend(clientfd, filename, msg);
+      clientPrint(clientfd);
+    }
+    else if (!strcmp(input, "random", 6))
+    {
+      sscanf(input, "random %d", &m);
+
+      for (int i = 0; i < m; i++)
+      {
+        random = rand() % 21 - 10;
+        value += random;
+        sprintf(msg, "name=%s&time=%f&value=%f", myname, time, value);
+        clientfd = Open_clientfd(hostname, port);
+        clientSend(clientfd, filename, msg);
+        clientPrint(clientfd);
+        sleep(1);
+      }
+    }
+    else if (!strcmp(input, "quit"))
+    {
+      break;
+    }
+  }
   Close(clientfd);
 }
 
@@ -101,6 +173,6 @@ int main(void)
   getargs_cp(myname, hostname, &port, filename, &time, &value);
 
   userTask(myname, hostname, port, filename, time, value);
-  
-  return(0);
+
+  return (0);
 }
