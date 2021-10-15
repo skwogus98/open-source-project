@@ -27,7 +27,7 @@ dataGet.cgi: dataGet.c stems.h
 	$(CC) $(CFLAGS) -w -o dataGet.cgi dataGet.c
 
 dataPost.cgi: dataPost.c stems.h
-	$(CC) $(CFLAGS) -w -o dataPost.cgi dataPost.c
+	$(CC) $(CFLAGS) -w -o dataPost.cgi dataPost.c -lmysqlclient
 
 .c.o:
 	$(CC) $(CFLAGS) -w -o $@ -c $<

@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <sys/time.h>
+#include <time.h>
 #include "stems.h"
 
 void clientSend(int fd, char *filename, char *body)
@@ -65,11 +66,12 @@ void clientPrint(int fd)
 }
 
 /* currently, there is no loop. I will add loop later */
-void userTask(char *myname, char *hostname, int port, char *filename, float time, float value)
+void userTask(char *myname, char *hostname, int port, char *filename, float curtime, float value)
 {
   int clientfd;
   char msg[MAXLINE];
-  char input[MAXLINE] int n;
+  char input[MAXLINE];
+  int n;
   int random;
   srand(time(NULL));
 
@@ -90,7 +92,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float time
       printf("random <n>: send (name, time , random value) to server <n> times\n");
       printf("quit: quit the program\n");
     }
-    else if (!strncmp(input, "name", 4)))
+    else if (!strncmp(input, "name", 4))
       {
         if (!strcmp(input, "name"))
         {
@@ -103,7 +105,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float time
           printf("Sensor name is changed to '%s'\n", myname);
         }
       }
-    else if (!strncmp(input, "value", 5)))
+    else if (!strncmp(input, "value", 5))
       {
         if (!strcmp(input, "value"))
         {
@@ -119,20 +121,20 @@ void userTask(char *myname, char *hostname, int port, char *filename, float time
       }
     else if (!strcmp(input, "send"))
     {
-      sprintf(msg, "name=%s&time=%f&value=%f", myname, time, value);
+      sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
       clientfd = Open_clientfd(hostname, port);
       clientSend(clientfd, filename, msg);
       clientPrint(clientfd);
     }
-    else if (!strcmp(input, "random", 6))
+    else if (!strncmp(input, "random", 6))
     {
-      sscanf(input, "random %d", &m);
+      sscanf(input, "random %d", &n);
 
-      for (int i = 0; i < m; i++)
+      for (int i = 0; i < n; i++)
       {
         random = rand() % 21 - 10;
         value += random;
-        sprintf(msg, "name=%s&time=%f&value=%f", myname, time, value);
+        sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
         clientfd = Open_clientfd(hostname, port);
         clientSend(clientfd, filename, msg);
         clientPrint(clientfd);
