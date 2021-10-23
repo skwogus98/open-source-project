@@ -116,8 +116,34 @@ int main(int argc, char *argv[])
   else{
       printf("false\n");
   }
+  mysql_free_result(res);
   //
 
+  //센서db에 저장
+  res = mysql_perform_query(dbfd, "iINSERT INTO testTable(time, value, idx) VALUES(time, value, null)");
+  row = mysql_fetch_row(res);
+  mysql_free_result(res);
+  //
+
+  //sensorlist 업데이트
+  res = mysql_perform_query(dbfd, "select count(*) from testTable");
+  row = mysql_fetch_row(res);
+  int count = atoi(row[0]);
+  mysql_free_result(res);
+
+  res = mysql_perform_query(dbfd, "select avg(value) from testTable");
+  row = mysql_fetch_row(res);
+  int ave = atoi(row[0]);
+  mysql_free_result(res);
+
+  res = mysql_perform_query(dbfd, "select MAX(value) from testTable");
+  row = mysql_fetch_row(res);
+  int max = atoi(row[0]);
+  mysql_free_result(res);
+
+  res = mysql_perform_query(dbfd, "update testTable set name = 'test2' where name = 'test'");
+  mysql_free_result(res);
+  //
   mysql_close(dbfd);
   //
 
