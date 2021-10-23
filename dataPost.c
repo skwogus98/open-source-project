@@ -49,7 +49,12 @@ MYSQL_RES* mysql_perform_query(MYSQL *connection, char *sql_query) {
 int main(int argc, char *argv[])
 {
   char astr[MAXBUF];
-  
+  char *temp;
+  char *tempT = NULL;
+  char *tempV = NULL;
+  char *name = NULL;
+  float time;
+  float value;
   
   MYSQL *dbfd;
   MYSQL_RES *res;
@@ -61,14 +66,38 @@ int main(int argc, char *argv[])
   mysqlD.password = "mysql1234";//pw
   mysqlD.database = "testDB";//db name
 
-  dbfd = mysql_connection_setup(mysqlD);
-
-  res = mysql_perform_query(dbfd, "show tables");
-
   printf("HTTP/1.0 200 OK\r\n");
   printf("Server: My Web Server\r\n");
   printf("Content-Length: %d\r\n", strlen(astr));
   printf("Content-Type: text/plain\r\n\r\n");
+
+  read(STDIN_FILENO, astr, MAXBUF);
+  //printf(astr);
+  
+  //인자 자르기
+  
+  temp = strtok(astr, "=");
+  temp = strtok(NULL, "&");
+  name = temp;
+  
+  temp = strtok(NULL, "=");
+  temp = strtok(NULL, "&");
+  time = atof(temp);
+
+  temp = strtok(NULL, "=");
+  temp = strtok(NULL, "&");
+  value = atof(temp);
+  //
+  
+
+  printf("name: %s\n",name);
+  printf("time: %f\n",time);
+  printf("value: %f\n",value);
+  
+  //db연결
+  dbfd = mysql_connection_setup(mysqlD);
+
+  res = mysql_perform_query(dbfd, "show tables");
 
 
   //printf("MySQL Tables in mysql database:\n");
@@ -77,10 +106,10 @@ int main(int argc, char *argv[])
 
   mysql_free_result(res);
   mysql_close(dbfd);
+  //
   
-  
-  read(STDIN_FILENO, astr, MAXBUF);
   /*
+  read(STDIN_FILENO, astr, MAXBUF);
   printf("HTTP/1.0 200 OK\r\n");
   printf("Server: My Web Server\r\n");
   printf("Content-Length: %d\r\n", strlen(astr));

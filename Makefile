@@ -28,7 +28,6 @@ dataGet.cgi: dataGet.c stems.h
 
 dataPost.cgi: dataPost.c stems.h
 	$(CC) $(CFLAGS) -w -o dataPost.cgi dataPost.c -lmysqlclient
-	//-mysqlclient 추가
 
 .c.o:
 	$(CC) $(CFLAGS) -w -o $@ -c $<
