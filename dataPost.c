@@ -105,9 +105,22 @@ int main(int argc, char *argv[])
       printf("%s\n", row[0]);
 
   mysql_free_result(res);
+  
+  //테이블에 튜플 존재여부 확인
+  res = mysql_perform_query(dbfd, "select exists (select name from testTable where name='test' limit 1) as success");
+  row = mysql_fetch_row(res);
+  printf(row[0]);
+  if(atoi(row[0]) == 1){
+      printf("true\n");
+  }
+  else{
+      printf("false\n");
+  }
+  //
+
   mysql_close(dbfd);
   //
-  
+
   /*
   read(STDIN_FILENO, astr, MAXBUF);
   printf("HTTP/1.0 200 OK\r\n");
