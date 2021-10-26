@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
   mysql_free_result(res);
   //
 
-  //sensorlist 업데이트
+  //sensor의 cnt avg max값 추출
   sprintf(query, "select count(*) from %s", name);
   res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
@@ -141,7 +141,9 @@ int main(int argc, char *argv[])
   row = mysql_fetch_row(res);
   float max = atof(row[0]);
   mysql_free_result(res);
+  //
 
+  //sensorList의 값 업데이트
   sprintf(query, "update sensorList set cnt = %d, ave = %f, max = %f where name = '%s'", count, ave, max, name);
   res = mysql_perform_query(dbfd, query);
   mysql_free_result(res);
