@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS `musicDB` ;
+DROP DATABASE IF EXISTS `sensorDB` ;
 
 CREATE DATABASE IF NOT EXISTS `sensorDB` 
   DEFAULT CHARACTER SET utf8 
@@ -19,3 +19,14 @@ CREATE TABLE IF NOT EXISTS `sensorList` (
 ENGINE = InnoDB
   DEFAULT CHARACTER SET utf8 
   DEFAULT COLLATE utf8_general_ci;
+
+/* 새로운 센서 추가
+CREATE TABLE IF NOT EXISTS `sensorName` (
+  `idx` INT NOT NULL auto_increment,
+  `time` FLOAT NULL,
+  `value` FLOAT NULL,
+  PRIMARY KEY (`idx`))
+ENGINE = InnoDB
+  DEFAULT CHARACTER SET utf8 
+  DEFAULT COLLATE utf8_general_ci;
+*/ 

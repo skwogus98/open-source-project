@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
   char *name = NULL;
   float time;
   float value;
+  char* query;
   
   MYSQL *dbfd;
   MYSQL_RES *res;
@@ -64,12 +65,15 @@ int main(int argc, char *argv[])
   mysqlD.server = "localhost";
   mysqlD.user = "root";//username
   mysqlD.password = "mysql1234";//pw
-  mysqlD.database = "testDB";//db name
+  mysqlD.database = "sensorDB";//db name
 
   printf("HTTP/1.0 200 OK\r\n");
   printf("Server: My Web Server\r\n");
   printf("Content-Length: %d\r\n", strlen(astr));
   printf("Content-Type: text/plain\r\n\r\n");
+  printf(astr);
+
+  fflush(stdout);
 
   read(STDIN_FILENO, astr, MAXBUF);
   //printf(astr);
@@ -88,72 +92,72 @@ int main(int argc, char *argv[])
   temp = strtok(NULL, "&");
   value = atof(temp);
   //
-  
-
-  printf("name: %s\n",name);
-  printf("time: %f\n",time);
-  printf("value: %f\n",value);
-  
+  //printf("%s %f %f\n", name, time, value);
   //db연결
   dbfd = mysql_connection_setup(mysqlD);
-
-  res = mysql_perform_query(dbfd, "show tables");
-
-
-  //printf("MySQL Tables in mysql database:\n");
-  while((row = mysql_fetch_row(res)) != NULL)
-      printf("%s\n", row[0]);
-
-  mysql_free_result(res);
   
   //테이블에 튜플 존재여부 확인
-  res = mysql_perform_query(dbfd, "select exists (select name from testTable where name='test' limit 1) as success");
+  sprintf(query, "select exists (select name from sensorList where name=%s limit 1) as success", name);
+  printf(query);
+  res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
-  printf(row[0]);
   if(atoi(row[0]) == 1){
       printf("true\n");
   }
-  else{
-      printf("false\n");
+  else{//존재 하지 않을시 튜플 추가
+      sprintf(query, "iINSERT INTO sensorList(id, name, cnt, ave, max) VALUES(null, '%s', 0, 0, 0)", name);//sensorList에 추가
+      res = mysql_perform_query(dbfd, query);
+      printf("1\n");
+      mysql_free_result(res);
+
+
+      //새로운 테이블 생성
+      sprintf(query, "CREATE %s (idx INT NOT NULL auto_increment, time FLOAT NULL, value FLOAT NULL, PRIMARY KEY (idx))", name);
+      res = mysql_perform_query(dbfd, query);
+      printf("2\n");
+      res = mysql_perform_query(dbfd, query);
   }
   mysql_free_result(res);
   //
-
+/*
   //센서db에 저장
-  res = mysql_perform_query(dbfd, "iINSERT INTO testTable(time, value, idx) VALUES(time, value, null)");
+  sprintf(query, "iINSERT INTO %s(time, value, idx) VALUES(%f, %f, null)", name, time, value);
+  res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
+  printf("3\n");
   mysql_free_result(res);
   //
 
   //sensorlist 업데이트
-  res = mysql_perform_query(dbfd, "select count(*) from testTable");
+  sprintf(query, "select count(*) from %s", name);
+  res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
   int count = atoi(row[0]);
+  printf("4\n");
   mysql_free_result(res);
 
-  res = mysql_perform_query(dbfd, "select avg(value) from testTable");
+  sprintf(query, "select avg(value) from %s", name);
+  res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
   int ave = atoi(row[0]);
+  printf("5\n");
   mysql_free_result(res);
 
-  res = mysql_perform_query(dbfd, "select MAX(value) from testTable");
+  sprintf(query, "select MAX(value) from %s", name);
+  res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
   int max = atoi(row[0]);
+  printf("6\n");
   mysql_free_result(res);
 
-  res = mysql_perform_query(dbfd, "update testTable set name = 'test2' where name = 'test'");
+  sprintf(query, "update sensorList set cnt = %f, ave = %f, max = %f where name = '%s'", count, ave, max, name);
+  res = mysql_perform_query(dbfd, query);
+  printf("7\n");
   mysql_free_result(res);
   //
   mysql_close(dbfd);
   //
-
-  /*
-  read(STDIN_FILENO, astr, MAXBUF);
-  printf("HTTP/1.0 200 OK\r\n");
-  printf("Server: My Web Server\r\n");
-  printf("Content-Length: %d\r\n", strlen(astr));
-  printf("Content-Type: text/plain\r\n\r\n");
-  printf(astr);*/
+*/
   fflush(stdout);
   return(0);
 }

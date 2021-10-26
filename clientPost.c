@@ -163,6 +163,10 @@ void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *
   fscanf(fp, "%s", filename);
   fscanf(fp, "%f", time);
   fscanf(fp, "%f", value);
+/*
+  time_t curtime;
+  curtime = time(NULL);
+  time = (float *) curtime;*/
   fclose(fp);
 }
 
