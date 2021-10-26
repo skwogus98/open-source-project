@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
   char *name = NULL;
   float time;
   float value;
-  char* query;
+  char query[255];
   
   MYSQL *dbfd;
   MYSQL_RES *res;
@@ -97,34 +97,29 @@ int main(int argc, char *argv[])
   dbfd = mysql_connection_setup(mysqlD);
   
   //테이블에 튜플 존재여부 확인
-  sprintf(query, "select exists (select name from sensorList where name=%s limit 1) as success", name);
-  printf(query);
+  sprintf(query, "select exists (select name from sensorList where name='%s' limit 1) as success", name);
   res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
   if(atoi(row[0]) == 1){
-      printf("true\n");
+      //printf("true\n");
   }
-  else{//존재 하지 않을시 튜플 추가
-      sprintf(query, "iINSERT INTO sensorList(id, name, cnt, ave, max) VALUES(null, '%s', 0, 0, 0)", name);//sensorList에 추가
-      res = mysql_perform_query(dbfd, query);
-      printf("1\n");
+  else{//존재 하지 않을시 튜플 추가      
       mysql_free_result(res);
-
+      sprintf(query, "INSERT INTO sensorList(id, name, cnt, ave, max) VALUES(null, '%s', 0, 0, 0)", name);//sensorList에 추가
+      res = mysql_perform_query(dbfd, query);
+      mysql_free_result(res);      
 
       //새로운 테이블 생성
-      sprintf(query, "CREATE %s (idx INT NOT NULL auto_increment, time FLOAT NULL, value FLOAT NULL, PRIMARY KEY (idx))", name);
-      res = mysql_perform_query(dbfd, query);
-      printf("2\n");
+      
+      sprintf(query, "CREATE TABLE IF NOT EXISTS `%s` (`idx` INT NOT NULL auto_increment, `time` FLOAT NULL, `value` FLOAT NULL, PRIMARY KEY (`idx`))ENGINE = InnoDB  DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci;", name);
       res = mysql_perform_query(dbfd, query);
   }
   mysql_free_result(res);
   //
-/*
+
   //센서db에 저장
-  sprintf(query, "iINSERT INTO %s(time, value, idx) VALUES(%f, %f, null)", name, time, value);
+  sprintf(query, "INSERT INTO %s(time, value, idx) VALUES(%f, %f, null)", name, time, value);
   res = mysql_perform_query(dbfd, query);
-  row = mysql_fetch_row(res);
-  printf("3\n");
   mysql_free_result(res);
   //
 
@@ -133,31 +128,27 @@ int main(int argc, char *argv[])
   res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
   int count = atoi(row[0]);
-  printf("4\n");
   mysql_free_result(res);
 
   sprintf(query, "select avg(value) from %s", name);
   res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
-  int ave = atoi(row[0]);
-  printf("5\n");
+  float ave = atof(row[0]);
   mysql_free_result(res);
 
   sprintf(query, "select MAX(value) from %s", name);
   res = mysql_perform_query(dbfd, query);
   row = mysql_fetch_row(res);
-  int max = atoi(row[0]);
-  printf("6\n");
+  float max = atof(row[0]);
   mysql_free_result(res);
 
-  sprintf(query, "update sensorList set cnt = %f, ave = %f, max = %f where name = '%s'", count, ave, max, name);
+  sprintf(query, "update sensorList set cnt = %d, ave = %f, max = %f where name = '%s'", count, ave, max, name);
   res = mysql_perform_query(dbfd, query);
-  printf("7\n");
   mysql_free_result(res);
   //
   mysql_close(dbfd);
   //
-*/
+
   fflush(stdout);
   return(0);
 }
