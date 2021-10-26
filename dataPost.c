@@ -72,9 +72,7 @@ int main(int argc, char *argv[])
   printf("Content-Length: %d\r\n", strlen(astr));
   printf("Content-Type: text/plain\r\n\r\n");
   printf(astr);
-
-  fflush(stdout);
-
+  
   read(STDIN_FILENO, astr, MAXBUF);
   //printf(astr);
   
