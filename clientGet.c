@@ -46,19 +46,19 @@ void clientPrint(int fd)
   int n;
   
   Rio_readinitb(&rio, fd);
-
+  
   /* Read and display the HTTP Header */
   n = Rio_readlineb(&rio, buf, MAXBUF);
   while (strcmp(buf, "\r\n") && (n > 0)) {
-    printf("Header: %s", buf);
+    //printf("Header: %s", buf);
     n = Rio_readlineb(&rio, buf, MAXBUF);
 
     /* If you want to look for certain HTTP tags... */
     if (sscanf(buf, "Content-Length: %d ", &length) == 1) {
-      printf("Length = %d\n", length);
+      //printf("Length = %d\n", length);
     }
   }
-
+  
   /* Read and display the HTTP Body */
   n = Rio_readlineb(&rio, buf, MAXBUF);
   while (n > 0) {
@@ -71,22 +71,21 @@ void clientPrint(int fd)
 void userTask(char hostname[], int port, char webaddr[])
 {
   int clientfd;
-
-  clientfd = Open_clientfd(hostname, port);
   
   char sname[MAXLINE];
   char temp[MAXLINE];
-  char input[MAXLINE];
-
-  printf("\n");
+  char input[255];
 
   while (1)
   {
     printf(">>");
     scanf("%[^\n]", &input);
+    scanf("%*[^\n]");
+
     if (!strcmp(input, "LIST"))
     {
-      webaddr = "/dataGet.cgi?command=LIST"
+      webaddr = "/dataGet.cgi?command=LIST";
+      clientfd = Open_clientfd(hostname, port);
       clientSend(clientfd, webaddr);
       clientPrint(clientfd);
     }
@@ -94,6 +93,7 @@ void userTask(char hostname[], int port, char webaddr[])
     {
       sscanf(input, "INFO %s", sname);
       sprintf(webaddr, "/dataGet.cgi?command=INFO&value=%s", sname);
+      clientfd = Open_clientfd(hostname, port);
       clientSend(clientfd, webaddr);
       clientPrint(clientfd);
     }
@@ -105,6 +105,7 @@ void userTask(char hostname[], int port, char webaddr[])
         n=1;
       }
       sprintf(webaddr, "/dataGet.cgi?NAME=%s&N=%d",sname,n);
+      clientfd = Open_clientfd(hostname, port);
       clientSend(clientfd, webaddr);
       clientPrint(clientfd);
     }
@@ -112,6 +113,9 @@ void userTask(char hostname[], int port, char webaddr[])
     {
       break;
     }
+
+    if ( getchar() == EOF )
+        break;
   }
   Close(clientfd);
 }

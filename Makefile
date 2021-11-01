@@ -24,7 +24,7 @@ clientPost: clientPost.o stems.o
 	$(CC) $(CFLAGS) -w -o clientPost clientPost.o stems.o $(LIBS)
 
 dataGet.cgi: dataGet.c stems.h
-	$(CC) $(CFLAGS) -w -o dataGet.cgi dataGet.c
+	$(CC) $(CFLAGS) -w -o dataGet.cgi dataGet.c -lmysqlclient
 
 dataPost.cgi: dataPost.c stems.h
 	$(CC) $(CFLAGS) -w -o dataPost.cgi dataPost.c -lmysqlclient

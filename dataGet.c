@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <unistd.h>
+#include "/usr/include/mysql/mysql.h"
 
 //
 // This program is intended to help you test your web server.
@@ -87,13 +88,14 @@ void htmlReturn(void)
 void textReturn(void)
 {
   char content[MAXLINE];
-  char command[255];
-  char sname[255];
-  int n;
-
+  char *command = "NONE";
+  char *sname;
+  int n = 1;
+  char *strTime;
   char *buf;
   char *temp;
   char *ptr;
+  char query[255];
 
   MYSQL *dbfd;
   MYSQL_RES *res;
@@ -105,55 +107,82 @@ void textReturn(void)
   mysqlD.password = "mysql1234"; // pw
   mysqlD.database = "sensorDB";  // db name
   
+  printf("Content-Length: %d\n", strlen(content));
+  printf("Content-Type: text/plain\r\n\r\n");
 
   buf = getenv("QUERY_STRING");
   //인자분리
-  temp = strtok(buf), "=");
-  if (strcmp(temp, "command"))
+  
+  temp = strtok(buf, "=");  
+  if (strcmp(temp, "command") ==0)
   {
     temp = strtok(NULL, "&");
     command = temp;
   }
-  else if (strcmp(temp, "NAME"))
+  else if (strcmp(temp, "NAME")==0)
   {
     temp = strtok(NULL, "&");
     sname = temp;
   }
 
-  temp = strtok(buf), "=");
-  if (strcmp(temp, "N"))
+  temp = strtok(NULL, "=");
+
+  if (strcmp(temp, "N")==0)
   {
     temp = strtok(NULL, "&");
     n = atoi(temp);
   }
-  else if (strcmp(temp, "value"))
+  else if (strcmp(temp, "value")==0)
   {
     temp = strtok(NULL, "&");
     sname = temp;
   }
 
+
   dbfd = mysql_connection_setup(mysqlD);
-
+  
   // INFO
-  if (strcmp(command, "INFO"))
+  if (strcmp(command, "INFO")==0)
   {
+    sprintf(query, "select exists (select name from sensorList where name='%s' limit 1) as success", sname);
+    res = mysql_perform_query(dbfd, query);
+    row = mysql_fetch_row(res);
+    if(atoi(row[0]) == 1){
+      mysql_free_result(res);
 
-  }
+      sprintf(query, "select cnt, ave, max from sensorList where name='%s'", sname);
+      res = mysql_perform_query(dbfd, query);
+      row = mysql_fetch_row(res);
+      sprintf(content, "%s %s %s\n",row[0],row[1],row[2]);
+      mysql_free_result(res);
+    }
+    else{
+      sprintf(content,"There is no sensor named sname.\n");
+    }
+    
+  }//GET
   else
   {
-    // get
-  }
+    sprintf(query, "select time, value from %s order by idx DESC limit %d", sname, n);
+    res = mysql_perform_query(dbfd, query);
 
+    while((row = mysql_fetch_row(res))){
+      time_t timeGet = atoi(row[0]);
+      sprintf(content, "%s%s%s\n", content , ctime(&timeGet), row[1]);
+    }
+  }
+  mysql_close(dbfd);
+  
   /* Generate the HTTP response */
-  printf("Content-Length: %d\n", strlen(content));
-  printf("Content-Type: text/plain\r\n\r\n");
+  
+  
   printf("%s", content);
   fflush(stdout);
 }
 
 int main(void)
 {
-  // htmlReturn();
+  //htmlReturn();
   textReturn();
   return (0);
 }

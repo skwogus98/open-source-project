@@ -155,14 +155,14 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
     //수정 시작
     Write(pfd[1], cgiargs, strlen(cgiargs)+1);
   }
-  
+  /*
   sprintf(buf, "HTTP/1.0 200 OK\r\n");
   sprintf(buf, "%sServer: My Web Server\r\n", buf);
   sprintf(buf, "%sContent-Length: %d\r\n", buf, strlen(astr));
   sprintf(buf, "%sContent-Type: text/plain\r\n", buf);
   sprintf(buf, "%sStat-req-arrival: %lf\r\n\r\n", buf, arrivalTime);
   //sprintf(buf, "%s%s\r\n", buf, astr);
-
+  */
   /////수정점
   Setenv("QUERY_STRING", cgiargs, 1);
 
@@ -204,7 +204,7 @@ void requestServeStatic(int fd, char *filename, int filesize, double arrivalTime
   srcfd = Open(filename, O_RDONLY, 0);
   srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
   Close(srcfd);
-
+  
   // put together response
   sprintf(buf, "HTTP/1.0 200 OK\r\n");
   sprintf(buf, "%sServer: My Web Server\r\n", buf);
@@ -219,7 +219,7 @@ void requestServeStatic(int fd, char *filename, int filesize, double arrivalTime
   sprintf(buf, "%sContent-Type: %s\r\n\r\n", buf, filetype);
 
   Rio_writen(fd, buf, strlen(buf));
-
+  
   // Writes out to the client socket the memory-mapped file 
   Rio_writen(fd, srcp, filesize);
   Munmap(srcp, filesize);

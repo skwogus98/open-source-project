@@ -75,12 +75,13 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
   int random;
   srand(time(NULL));
 
-  printf("if you want to see command, type 'help'");
+  printf("if you want to see command, type 'help'\n");
 
   while (1)
   {
     printf(">>");
     scanf("%[^\n]", &input);
+    scanf("%*[^\n]");
     if (!strcmp(input, "help"))
     {
       printf("help: list available commands.\n");
@@ -145,11 +146,13 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
     {
       break;
     }
+    if ( getchar() == EOF )
+        break;   
   }
   Close(clientfd);
 }
 
-void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *time, float *value)
+void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *curtime, float *value)
 {
   FILE *fp;
 
@@ -161,12 +164,12 @@ void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *
   fscanf(fp, "%s", hostname);
   fscanf(fp, "%d", port);
   fscanf(fp, "%s", filename);
-  fscanf(fp, "%f", time);
   fscanf(fp, "%f", value);
-  /*
-    time_t curtime;
-    curtime = time(NULL);
-    time = (float *) curtime;*/
+
+  time_t ltime;
+  time(&ltime);
+  float ftime = (float)ltime;
+  *curtime = ftime;//1235713769
   fclose(fp);
 }
 
@@ -177,7 +180,6 @@ int main(void)
   float time, value;
 
   getargs_cp(myname, hostname, &port, filename, &time, &value);
-
   userTask(myname, hostname, port, filename, time, value);
 
   return (0);
