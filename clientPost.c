@@ -1,7 +1,7 @@
 /*
  * clientPost.c: A very, very primitive HTTP client for sensor
- * 
- * To run, prepare config-cp.txt and try: 
+ *
+ * To run, prepare config-cp.txt and try:
  *      ./clientPost
  *
  * Sends one HTTP request to the specified HTTP server.
@@ -80,7 +80,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
   while (1)
   {
     printf(">>");
-    scanf("%s", &input);
+    scanf("%[^\n]", &input);
     if (!strcmp(input, "help"))
     {
       printf("help: list available commands.\n");
@@ -93,32 +93,32 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
       printf("quit: quit the program\n");
     }
     else if (!strncmp(input, "name", 4))
+    {
+      if (!strcmp(input, "name"))
       {
-        if (!strcmp(input, "name"))
-        {
-          printf("Current sensor is %s \n", myname);
-        }
-        else
-        {
-          printf("%s\n", input);
-          sscanf(input, "name %s", myname);
-          printf("Sensor name is changed to '%s'\n", myname);
-        }
+        printf("Current sensor is %s \n", myname);
       }
+      else
+      {
+        printf("%s\n", input);
+        sscanf(input, "name %s", myname);
+        printf("Sensor name is changed to '%s'\n", myname);
+      }
+    }
     else if (!strncmp(input, "value", 5))
+    {
+      if (!strcmp(input, "value"))
       {
-        if (!strcmp(input, "value"))
-        {
-          printf("Current value of sensor is %f \n", value);
-        }
-        else
-        {
-          printf("%s\n", input);
-          sscanf(input, "value %s", n);
-          value = atof(n);
-          printf("Sensor name is changed to '%s'\n", value);
-        }
+        printf("Current value of sensor is %f \n", value);
       }
+      else
+      {
+        printf("%s\n", input);
+        sscanf(input, "value %s", n);
+        value = atof(n);
+        printf("Sensor name is changed to '%s'\n", value);
+      }
+    }
     else if (!strcmp(input, "send"))
     {
       sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
@@ -163,10 +163,10 @@ void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *
   fscanf(fp, "%s", filename);
   fscanf(fp, "%f", time);
   fscanf(fp, "%f", value);
-/*
-  time_t curtime;
-  curtime = time(NULL);
-  time = (float *) curtime;*/
+  /*
+    time_t curtime;
+    curtime = time(NULL);
+    time = (float *) curtime;*/
   fclose(fp);
 }
 

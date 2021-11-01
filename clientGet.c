@@ -73,8 +73,46 @@ void userTask(char hostname[], int port, char webaddr[])
   int clientfd;
 
   clientfd = Open_clientfd(hostname, port);
-  clientSend(clientfd, webaddr);
-  clientPrint(clientfd);
+  
+  char sname[MAXLINE];
+  char temp[MAXLINE];
+  char input[MAXLINE];
+
+  printf("\n");
+
+  while (1)
+  {
+    printf(">>");
+    scanf("%[^\n]", &input);
+    if (!strcmp(input, "LIST"))
+    {
+      webaddr = "/dataGet.cgi?command=LIST"
+      clientSend(clientfd, webaddr);
+      clientPrint(clientfd);
+    }
+    else if (!strncmp(input, "INFO", 4))
+    {
+      sscanf(input, "INFO %s", sname);
+      sprintf(webaddr, "/dataGet.cgi?command=INFO&value=%s", sname);
+      clientSend(clientfd, webaddr);
+      clientPrint(clientfd);
+    }
+    else if (!strncmp(input, "GET", 3))
+    {
+      int n;
+      sscanf(input, "GET %s %s", sname, temp);
+      if((n=atoi(temp))==0){
+        n=1;
+      }
+      sprintf(webaddr, "/dataGet.cgi?NAME=%s&N=%d",sname,n);
+      clientSend(clientfd, webaddr);
+      clientPrint(clientfd);
+    }
+    else if (!strcmp(input, "quit")||!strcmp(input, "exit"))
+    {
+      break;
+    }
+  }
   Close(clientfd);
 }
 
