@@ -104,6 +104,7 @@ void textReturn(void)
   mysqlD.user = "root";          // username
   mysqlD.password = "mysql1234"; // pw
   mysqlD.database = "sensorDB";  // db name
+  
 
   buf = getenv("QUERY_STRING");
   //인자분리
@@ -131,9 +132,12 @@ void textReturn(void)
     sname = temp;
   }
 
+  dbfd = mysql_connection_setup(mysqlD);
+
   // INFO
   if (strcmp(command, "INFO"))
   {
+
   }
   else
   {
