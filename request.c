@@ -169,6 +169,32 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   exeCgi(filename, fd, pfd, arrivalTime);
   ////////////
 
+  ///////alarmClient 실행
+  int pid = fork();
+  //자식 프로세스
+  if (pid == 0){
+    if(mkfifo("args", 0666)==-1){
+      perror("mkfifo failed");
+      exit(1);
+    }
+    int pipeSize = Open("size", O_RDWR, 0);
+    Write(pipeSize, cgiargs, sizeof(cgiargs));
+
+    int pipeArgs = Open("args", O_RDWR, 0);
+    Write(pipeArgs, cgiargs, sizeof(cgiargs));
+    
+    Execve("./alarmClient", NULL, environ);
+  } else if (pid > 0) {
+    /* do parent job */
+    wait(&res);
+
+  } else {
+    fprintf(stderr, "fork failed.\n");
+    exit(1);
+  }
+
+  ///////
+
   Rio_writen(fd, buf, strlen(buf));
 
 }
