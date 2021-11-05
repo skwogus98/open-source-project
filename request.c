@@ -6,6 +6,7 @@
 
 #include "stems.h"
 #include "request.h"
+#define FIFO "./fifo"
 
 /*  time related functions */
 struct timeval startTime;
@@ -163,37 +164,13 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   sprintf(buf, "%sStat-req-arrival: %lf\r\n\r\n", buf, arrivalTime);
   //sprintf(buf, "%s%s\r\n", buf, astr);
   */
+ 
   /////수정점
   Setenv("QUERY_STRING", cgiargs, 1);
 
   exeCgi(filename, fd, pfd, arrivalTime);
+  alarmClient(cgiargs);
   ////////////
-
-  ///////alarmClient 실행
-  int pid = fork();
-  //자식 프로세스
-  if (pid == 0){
-    if(mkfifo("args", 0666)==-1){
-      perror("mkfifo failed");
-      exit(1);
-    }
-    int pipeSize = Open("size", O_RDWR, 0);
-    Write(pipeSize, cgiargs, sizeof(cgiargs));
-
-    int pipeArgs = Open("args", O_RDWR, 0);
-    Write(pipeArgs, cgiargs, sizeof(cgiargs));
-    
-    Execve("./alarmClient", NULL, environ);
-  } else if (pid > 0) {
-    /* do parent job */
-    wait(&res);
-
-  } else {
-    fprintf(stderr, "fork failed.\n");
-    exit(1);
-  }
-
-  ///////
 
   Rio_writen(fd, buf, strlen(buf));
 
@@ -218,6 +195,33 @@ void exeCgi(char* filename, int connfd, int pfd[2], double arrivalTime){
   }
 }
 
+void alarmClient(char msg[]){
+  int res;
+
+  unlink(FIFO);
+  if(mkfifo(FIFO, 0666)==-1){
+    perror("mkfifo failed");
+    exit(1);
+  }
+  //sprintf(msg, "%c%s", sizeof(cgiargs)+'0', cgiargs);
+  int fd = Open(FIFO, O_RDWR, 0);
+
+  int pid = fork();
+  //자식 프로세스 
+  if (pid == 0){
+    wait(&res);
+    Execve("./alarmClient", NULL, environ);
+  } else if (pid > 0) {
+    /* do parent job */
+    Write(fd, msg, 80);
+    //Read(pipeArgs, test, sizeof(msg));
+    Close(fd);
+
+  } else {
+    fprintf(stderr, "fork failed.\n");
+    exit(1);
+  }
+}
 
 void requestServeStatic(int fd, char *filename, int filesize, double arrivalTime)
 {

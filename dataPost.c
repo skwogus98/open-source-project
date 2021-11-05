@@ -67,14 +67,14 @@ int main(int argc, char *argv[])
   mysqlD.password = "mysql1234";//pw
   mysqlD.database = "sensorDB";//db name
 
+  read(STDIN_FILENO, astr, MAXBUF);
+  
   printf("HTTP/1.0 200 OK\r\n");
   printf("Server: My Web Server\r\n");
   printf("Content-Length: %d\r\n", strlen(astr));
   printf("Content-Type: text/plain\r\n\r\n");
   printf(astr);
-  
-  read(STDIN_FILENO, astr, MAXBUF);
-  //printf(astr);
+  printf("\n");
   
   //인자 자르기
   

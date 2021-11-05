@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include "stems.h"
+#include <string.h>
+#define FIFO "./fifo"
 
 /*
  * Send an HTTP request for the specified file
@@ -87,16 +89,26 @@ void userTask(char *hostname, int port, char *filename, char *msg)
 void getArgs(char msg[])
 {
   char size;
-  int pipeSize = Open("size", O_RDWR, 0);
-  Read(pipeArgs, size, sizeof(char) * 1);
+  char *temp;
+  //printf("test\n");
+/*
+  int pipeSize = Open(FIFO, O_RDWR, 0);
+  Read(pipeSize, size, sizeof(char) * 1);
   int sizePipe = size - '0';
-
-  int pipeArgs = Open("args", O_RDWR, 0);
-  Read(pipeArgs, msg, sizeof(char) * sizePipe);
-
+  Close(pipeSize);
+*/
+  int fd = Open(FIFO, O_RDWR, 0);
+  Read(fd, msg, 80);
+  Close(fd);
+  printf(msg);
+/*
+  strtok(temp, size);
+  msg = strtok(temp, "\n");
+*/
+/*
   printf("alarmClient args: ");
   printf(msg);
-  printf("\n");
+  printf("\n");*/
 }
 ///
 
@@ -120,7 +132,9 @@ void getargs_pc(char *hostname, int *port, char *filename, char *sensorName, flo
 ///값을 검사
 int checkData(char msg[], char *sensorName, float threshold)
 {
-  temp = strtok(buf, "=");
+  char *temp;
+  char *buf;
+  temp = strtok(msg, "=");
   if (strcmp(temp, "name") == 0)
   {
     temp = strtok(NULL, "&");
@@ -131,12 +145,15 @@ int checkData(char msg[], char *sensorName, float threshold)
 
       temp = strtok(NULL, "="); // value
       temp = strtok(NULL, "&");
+
       if (atof(temp) > threshold)
       {
+        printf("temperature over\n");
         return 1; //문제가 있다는 것을 알림
       }
     }
   }
+  printf("temperature under\n");
   return 0; // 문제가 없을 시 alarmclient 종료
 }
 
@@ -145,6 +162,7 @@ int main(void)
   char sensorName[MAXLINE], hostname[MAXLINE], filename[MAXLINE], msg[MAXLINE];
   int port;
   float threshold, value;
+  
 
   getArgs(msg);
   getargs_pc(hostname, &port, filename, &sensorName, &threshold);
