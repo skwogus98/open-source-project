@@ -169,7 +169,7 @@ void requestServeDynamic(rio_t *rio, int fd, char *filename, char *cgiargs, int 
   Setenv("QUERY_STRING", cgiargs, 1);
 
   exeCgi(filename, fd, pfd, arrivalTime);
-  alarmClient(cgiargs);
+  //alarmClient(cgiargs);
   ////////////
 
   Rio_writen(fd, buf, strlen(buf));
@@ -188,34 +188,6 @@ void exeCgi(char* filename, int connfd, int pfd[2], double arrivalTime){
   } else if (pid > 0) {
     /* do parent job */
     wait(&res);
-
-  } else {
-    fprintf(stderr, "fork failed.\n");
-    exit(1);
-  }
-}
-
-void alarmClient(char msg[]){
-  int res;
-
-  unlink(FIFO);
-  if(mkfifo(FIFO, 0666)==-1){
-    perror("mkfifo failed");
-    exit(1);
-  }
-  //sprintf(msg, "%c%s", sizeof(cgiargs)+'0', cgiargs);
-  int fd = Open(FIFO, O_RDWR, 0);
-
-  int pid = fork();
-  //자식 프로세스 
-  if (pid == 0){
-    wait(&res);
-    Execve("./alarmClient", NULL, environ);
-  } else if (pid > 0) {
-    /* do parent job */
-    Write(fd, msg, 80);
-    //Read(pipeArgs, test, sizeof(msg));
-    Close(fd);
 
   } else {
     fprintf(stderr, "fork failed.\n");
