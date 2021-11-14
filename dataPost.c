@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "/usr/include/mysql/mysql.h"
 #define _CRT_SECURE_NO_WARNINGS
+#define FIFO "./fifo"
 //
 // This program is intended to help you test your web server.
 // 
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
   mysqlD.database = "sensorDB";//db name
 
   read(STDIN_FILENO, astr, MAXBUF);
-  
+
   printf("HTTP/1.0 200 OK\r\n");
   printf("Server: My Web Server\r\n");
   printf("Content-Length: %d\r\n", strlen(astr));
@@ -103,6 +104,8 @@ int main(int argc, char *argv[])
   printf(astr);
   printf("\n");
   
+  
+
   //인자 자르기
   
   temp = strtok(astr, "=");
@@ -116,6 +119,7 @@ int main(int argc, char *argv[])
   temp = strtok(NULL, "=");
   temp = strtok(NULL, "&");
   value = atof(temp);
+
   //
   //printf("%s %f %f\n", name, time, value);
   //db연결
@@ -176,9 +180,9 @@ int main(int argc, char *argv[])
   mysql_close(dbfd);
   //
 
+  char msg[255];
+  sprintf(msg, "name=%s&time=%f&value=%f", name, time, value);
   fflush(stdout);
-
-  alarmClient(astr);
-
+  alarmClient(msg);
   return(0);
 }

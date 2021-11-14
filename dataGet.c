@@ -107,8 +107,6 @@ void textReturn(void)
   mysqlD.password = "mysql1234"; // pw
   mysqlD.database = "sensorDB";  // db name
   
-  printf("Content-Length: %d\n", strlen(content));
-  printf("Content-Type: text/plain\r\n\r\n");
 
   buf = getenv("QUERY_STRING");
   //인자분리
@@ -125,19 +123,21 @@ void textReturn(void)
     sname = temp;
   }
 
-  temp = strtok(NULL, "=");
 
-  if (strcmp(temp, "N")==0)
-  {
-    temp = strtok(NULL, "&");
-    n = atoi(temp);
-  }
-  else if (strcmp(temp, "value")==0)
-  {
-    temp = strtok(NULL, "&");
-    sname = temp;
-  }
+  if(strcmp(command, "LIST")!=0){
+    temp = strtok(NULL, "=");
 
+    if (strcmp(temp, "N")==0)
+    {
+      temp = strtok(NULL, "&");
+      n = atoi(temp);
+    }
+    else if (strcmp(temp, "value")==0)
+    {
+      temp = strtok(NULL, "&");
+      sname = temp;
+    }
+  }
 
   dbfd = mysql_connection_setup(mysqlD);
   
@@ -160,7 +160,20 @@ void textReturn(void)
       sprintf(content,"There is no sensor named sname.\n");
     }
     
-  }//GET
+  }//LIST
+  else if (strcmp(command, "LIST")==0)
+  {
+    sprintf(query, "select name from sensorList");
+    res = mysql_perform_query(dbfd, query);
+    int num_fields = mysql_num_fields(res);
+    while((row = mysql_fetch_row(res))){
+      for(int i = 0; i  < num_fields; i++)
+      {
+        sprintf(content, "%s%s\n", content, row[i]);
+      }
+    }
+    
+  } //GET
   else
   {
     sprintf(query, "select time, value from %s order by idx DESC limit %d", sname, n);
@@ -168,14 +181,15 @@ void textReturn(void)
 
     while((row = mysql_fetch_row(res))){
       time_t timeGet = atoi(row[0]);
-      sprintf(content, "%s%s%s\n", content , ctime(&timeGet), row[1]);
+      sprintf(content, "%s%s%s\n", content , ctime(&timeGet), row[0]);
     }
   }
   mysql_close(dbfd);
   
   /* Generate the HTTP response */
   
-  
+  printf("Content-Length: %d\n", strlen(content));
+  printf("Content-Type: text/plain\r\n\r\n");
   printf("%s", content);
   fflush(stdout);
 }

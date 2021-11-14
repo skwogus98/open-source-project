@@ -3,15 +3,17 @@
 #include <assert.h>
 #include <unistd.h>
 
-int main()
+int main(int argc, char *argv[])
 {
 	char *token;
 	char name[MAXLINE], time[MAXLINE], value[MAXLINE], tempName[MAXLINE], tempTime[MAXLINE], tempValue[MAXLINE], bodyForTok[MAXLINE];
-	char *takeBody;
+	char takeBody[MAXBUF];
 	int count = 0;
 	char buff[MAXLINE];
 
-	takeBody = getenv("REQUEST_BODY");
+	read(STDIN_FILENO, takeBody, MAXBUF);
+	
+	
 	takeBody[strlen(takeBody)-1] = '\0';
 
 	//Body Seperate
@@ -61,7 +63,22 @@ int main()
 	}
 	value[strlen(value)-1] = '\0';
 
-	fprintf(stderr, "경고 : %s sensor로부터 %s 시각에 %s 라는 값이 발생했습니다.\nsuccess WARNING!(200)\n", name, time, value);
+	char content[MAXBUF];
+	sprintf(content, "경고 : %s sensor로부터 %s 시각에 %s 라는 값이 발생했습니다.\r\nname=%s&time=%s&value=%s", name, time, value, name, time, value);
+	fprintf(stderr, "HTTP/1.0 200 OK\r\n");
+	fprintf(stderr, "Server: My Web Server\r\n");
+	fprintf(stderr, "Content-Length: %d\r\n", strlen(content));
+	fprintf(stderr, "Content-Type: text/plain\r\n\r\n");
+	fprintf(stderr, content);
+	/*
+	sprintf(content, "경고 : %s sensor로부터 %s 시각에 %s 라는 값이 발생했습니다.\r\nname=%s&time=%s&value=%s", name, time, value, name, time, value);
+	printf("HTTP/1.0 200 OK\r\n");
+	printf("Server: My Web Server\r\n");
+	printf("Content-Length: %d\r\n", strlen(content));
+	printf("Content-Type: text/plain\r\n\r\n");
+	printf(content);
+*/
+	fflush(stderr);
 	
 	return 0;
 }

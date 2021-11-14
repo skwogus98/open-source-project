@@ -100,7 +100,6 @@ void getArgs(char msg[])
   int fd = Open(FIFO, O_RDWR, 0);
   Read(fd, msg, 80);
   Close(fd);
-  printf(msg);
 /*
   strtok(temp, size);
   msg = strtok(temp, "\n");
@@ -130,25 +129,33 @@ void getargs_pc(char *hostname, int *port, char *filename, char *sensorName, flo
 }
 
 ///값을 검사
-int checkData(char msg[], char *sensorName, float threshold)
+int checkData(char msg[], char *sensorName, float threshold, char sendmsg[])
 {
   char *temp;
   char *buf;
+  char *name = NULL;
+  float time;
+  float value;
+
   temp = strtok(msg, "=");
   if (strcmp(temp, "name") == 0)
   {
     temp = strtok(NULL, "&");
+    name = temp;
     if (strcmp(temp, sensorName) == 0)
     {
       temp = strtok(NULL, "="); // time 가르기
       temp = strtok(NULL, "&");
+      time = atof(temp);
 
       temp = strtok(NULL, "="); // value
       temp = strtok(NULL, "&");
+      value = atof(temp);
 
-      if (atof(temp) > threshold)
+      if (value > threshold)
       {
         printf("temperature over\n");
+        sprintf(sendmsg, "name=%s&time=%f&value=%f", name, time, value);
         return 1; //문제가 있다는 것을 알림
       }
     }
@@ -159,17 +166,17 @@ int checkData(char msg[], char *sensorName, float threshold)
 
 int main(void)
 {
-  char sensorName[MAXLINE], hostname[MAXLINE], filename[MAXLINE], msg[MAXLINE];
+  char sensorName[MAXLINE], hostname[MAXLINE], filename[MAXLINE], msg[MAXLINE], sendmsg[MAXLINE];
   int port;
   float threshold, value;
   
 
   getArgs(msg);
   getargs_pc(hostname, &port, filename, &sensorName, &threshold);
-
-  if (checkData(msg, sensorName, threshold) == 1)
+  
+  if (checkData(msg, sensorName, threshold, sendmsg) == 1)
   {
-    userTask(hostname, port, filename, msg);
+    userTask(hostname, port, filename, sendmsg);
   }
 
   return (0);

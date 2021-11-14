@@ -12,7 +12,7 @@ LIBS = -lpthread
 
 .SUFFIXES: .c .o 
 
-all: server clientPost clientGet dataGet.cgi dataPost.cgi alarmClient
+all: server clientPost clientGet dataGet.cgi dataPost.cgi alarmClient alarmServer alarm.cgi
 
 server: server.o request.o stems.o
 	$(CC) $(CFLAGS) -w -o server server.o request.o stems.o $(LIBS)
@@ -32,10 +32,17 @@ dataPost.cgi: dataPost.c stems.h
 alarmClient: alarmClient.o stems.o
 	$(CC) $(CFLAGS) -w -o alarmClient alarmClient.o stems.o $(LIBS)
 
+alarmServer: alarmServer.o request.o stems.o
+	$(CC) $(CFLAGS) -w -o alarmServer alarmServer.o request.o stems.o $(LIBS)
+
+alarm.cgi: alarm.c stems.o
+	$(CC) $(CFLAGS) -w -o alarm.cgi alarm.c stems.o
+
 .c.o:
 	$(CC) $(CFLAGS) -w -o $@ -c $<
 
 server.o: stems.h request.h
+alarmServer.o: stems.h request.h
 clientGet.o: stems.h
 clientPost.o: stems.h
 alarmClient.o: stems.h
