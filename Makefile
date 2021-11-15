@@ -2,7 +2,7 @@
 # To compile, type "make" or make "all"
 # To remove files, type "make clean"
 #
-OBJS = server.o request.o stems.o clientGet.o clientPost.o alarmClient.o
+OBJS = server.o request.o stems.o clientGet.o clientPost.o alarmClient.o clientRPI.o
 TARGET = server
 
 CC = gcc
@@ -12,7 +12,7 @@ LIBS = -lpthread
 
 .SUFFIXES: .c .o 
 
-all: server clientPost clientGet dataGet.cgi dataPost.cgi alarmClient alarmServer alarm.cgi
+all: server clientPost clientGet dataGet.cgi dataPost.cgi alarmClient alarmServer alarm.cgi clientRPI
 
 server: server.o request.o stems.o
 	$(CC) $(CFLAGS) -w -o server server.o request.o stems.o $(LIBS)
@@ -37,6 +37,9 @@ alarmServer: alarmServer.o request.o stems.o
 
 alarm.cgi: alarm.c stems.o
 	$(CC) $(CFLAGS) -w -o alarm.cgi alarm.c stems.o
+
+clientRPI: clientRPI.o stems.o
+	$(CC) $(CFLAGS) -w -o clientRPI clientRPI.o stems.o $(LIBS) -wiringPi.c -lwiringPi
 
 .c.o:
 	$(CC) $(CFLAGS) -w -o $@ -c $<

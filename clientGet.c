@@ -140,8 +140,18 @@ int main(void)
   int port;
   
   getargs_cg(hostname, &port, webaddr);
-
-  userTask(hostname, port, webaddr);
-  
+  //fork() alarmServer
+  int res;
+  int pid = fork();
+  if (pid == 0){
+    /* do child job */
+    Execve("./alarmServer", NULL, environ);
+  } else if (pid > 0) {
+    /* do parent job */
+    userTask(hostname, port, webaddr);
+  } else {
+    fprintf(stderr, "fork failed.\n");
+    exit(1);
+  }  
   return(0);
 }
