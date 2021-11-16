@@ -82,7 +82,7 @@ void userTask(char *hostname, int port, char *filename)
   time(&ltime);
   float curtime = (float)ltime;
 
-  read_dht11_dat(clientfd, curtime, filename, hostname, port);
+  read_dht11_dat(hostname, port, curtime, filename, hostname, port);
 }
 
 void getargs_cp(char *hostname, int *port, char *filename, int *period)
@@ -102,7 +102,7 @@ void getargs_cp(char *hostname, int *port, char *filename, int *period)
 }
 
 // sensor관련 코드
-void read_dht11_dat(int clientfd, float curtime, char *filename, char *hostname, int port)
+void read_dht11_dat(char *hostname, int port, float curtime, char *filename, char *hostname, int port)
 {
   char msg[MAXLINE];
   uint8_t laststate = HIGH;

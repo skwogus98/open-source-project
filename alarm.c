@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	value[strlen(value)-1] = '\0';
 
 	char content[MAXBUF];
-	sprintf(content, "경고 : %s sensor로부터 %s 시각에 %s 라는 값이 발생했습니다.\r\nname=%s&time=%s&value=%s", name, time, value, name, time, value);
+	sprintf(content, "경고 : %s sensor로부터 %s 시각에 %s 라는 값이 발생했습니다.\r\nname=%s&time=%s&value=%s\n", name, time, value, name, time, value);
 	fprintf(stderr, "HTTP/1.0 200 OK\r\n");
 	fprintf(stderr, "Server: My Web Server\r\n");
 	fprintf(stderr, "Content-Length: %d\r\n", strlen(content));
