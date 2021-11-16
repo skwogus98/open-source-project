@@ -160,6 +160,7 @@ void read_dht11_dat(char *hostname, int port, float curtime, char *filename, cha
   }
   else
     printf("Data get failed\n");
+    sleep(1);
 }
 
 int main(void)
