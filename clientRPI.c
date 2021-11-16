@@ -73,10 +73,9 @@ void clientPrint(int fd)
 }
 
 /* currently, there is no loop. I will add loop later */
-void userTask(char *myname, char *hostname, int port, char *filename, float value)
+void userTask(char *hostname, int port, char *filename)
 {
   int clientfd;
-  char msg[MAXLINE];
   char input[MAXLINE];
   int n;
   int random;
@@ -84,7 +83,9 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
   time(&ltime);
   float curtime = (float)ltime;
 
-  read_dht11_dat(clientfd, curtime);
+  clientfd = Open_clientfd(hostname, port);
+  read_dht11_dat(clientfd, curtime, filename);
+  Close(clientfd);
 }
 
 void getargs_cp(char *hostname, int *port, char *filename, int *period)
@@ -104,8 +105,9 @@ void getargs_cp(char *hostname, int *port, char *filename, int *period)
 }
 
 // sensor관련 코드
-void read_dht11_dat(int clientfd, float curtime)
+void read_dht11_dat(int clientfd, float curtime, char *filename)
 {
+  char msg[MAXLINE];
   uint8_t laststate = HIGH;
   uint8_t counter = 0;
   uint8_t j = 0, i;
@@ -146,31 +148,15 @@ void read_dht11_dat(int clientfd, float curtime)
     printf("humidity = %d.%d %% Temperature = %d.%d *C \n", dht11_dat[0], dht11_dat[1], dht11_dat[2], dht11_dat[3]);
 
     sprintf(msg, "name=humidity&time=%f&value=%d.%d", curtime, dht11_dat[0], dht11_dat[1]);
-    clientfd = Open_clientfd(hostname, port);
     clientSend(clientfd, filename, msg);
     clientPrint(clientfd);
 
     sprintf(msg, "name=temperature&time=%f&value=%d.%d", curtime, dht11_dat[2], dht11_dat[3]);
     clientSend(clientfd, filename, msg);
     clientPrint(clientfd);
-
-    Close(clientfd);
   }
   else
     printf("Data get failed\n");
-}
-
-int main(void)
-{
-  printf("dht11 Raspberry pi\n");
-  if (wiringPiSetup() == -1)
-    exit(1);
-  while (1)
-  {
-    read_dht11_dat();
-    delay(1000);
-  }
-  return 0;
 }
 
 int main(void)
@@ -181,9 +167,13 @@ int main(void)
   int period;
 
   getargs_cp(hostname, &port, filename, &period);
+
+  if (wiringPiSetup() == -1)
+    exit(1);
+  
   while (1)
   {
-    userTask(myname, hostname, port, filename, time, value);
+    userTask(hostname, port, filename);
     sleep(period);
   }
   return (0);
