@@ -75,7 +75,6 @@ void clientPrint(int fd)
 /* currently, there is no loop. I will add loop later */
 void userTask(char *hostname, int port, char *filename)
 {
-  int clientfd;
   char input[MAXLINE];
   int n;
   int random;
@@ -83,9 +82,7 @@ void userTask(char *hostname, int port, char *filename)
   time(&ltime);
   float curtime = (float)ltime;
 
-  clientfd = Open_clientfd(hostname, port);
-  read_dht11_dat(clientfd, curtime, filename);
-  Close(clientfd);
+  read_dht11_dat(clientfd, curtime, filename, hostname, port);
 }
 
 void getargs_cp(char *hostname, int *port, char *filename, int *period)
@@ -105,7 +102,7 @@ void getargs_cp(char *hostname, int *port, char *filename, int *period)
 }
 
 // sensor관련 코드
-void read_dht11_dat(int clientfd, float curtime, char *filename)
+void read_dht11_dat(int clientfd, float curtime, char *filename, char *hostname, int port)
 {
   char msg[MAXLINE];
   uint8_t laststate = HIGH;
@@ -114,6 +111,8 @@ void read_dht11_dat(int clientfd, float curtime, char *filename)
   uint8_t flag = HIGH;
   uint8_t state = 0;
   float f;
+
+  int clientfd;
 
   memset(dht11_dat, 0, sizeof(int) * 5);
   pinMode(DHTPIN, OUTPUT);
@@ -147,13 +146,16 @@ void read_dht11_dat(int clientfd, float curtime, char *filename)
   {
     printf("humidity = %d.%d %% Temperature = %d.%d *C \n", dht11_dat[0], dht11_dat[1], dht11_dat[2], dht11_dat[3]);
 
+    clientfd = Open_clientfd(hostname, port);
     sprintf(msg, "name=humidity&time=%f&value=%d.%d", curtime, dht11_dat[0], dht11_dat[1]);
     clientSend(clientfd, filename, msg);
-    clientPrint(clientfd);
+    Close(clientfd);
+    sleep(1);
 
+    clientfd = Open_clientfd(hostname, port);
     sprintf(msg, "name=temperature&time=%f&value=%d.%d", curtime, dht11_dat[2], dht11_dat[3]);
     clientSend(clientfd, filename, msg);
-    clientPrint(clientfd);
+    Close(clientfd);
   }
   else
     printf("Data get failed\n");
