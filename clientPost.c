@@ -66,7 +66,7 @@ void clientPrint(int fd)
 }
 
 /* currently, there is no loop. I will add loop later */
-void userTask(char *myname, char *hostname, int port, char *filename, float curtime, float value)
+void userTask(char *myname, char *hostname, int port, char *filename, float value)
 {
   int clientfd;
   char msg[MAXLINE];
@@ -122,6 +122,10 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
     }
     else if (!strcmp(input, "send"))
     {
+      time_t ltime = time(NULL);
+      //time(&ltime);
+      float curtime = (float)ltime;//1235713769
+
       sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
       clientfd = Open_clientfd(hostname, port);
       clientSend(clientfd, filename, msg);
@@ -133,6 +137,9 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
 
       for (int i = 0; i < n; i++)
       {
+        time_t ltime = time(NULL);
+        float curtime = (float)ltime;//1235713769
+
         random = rand() % 21 - 10;
         value += random;
         sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
@@ -152,7 +159,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float curt
   Close(clientfd);
 }
 
-void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *curtime, float *value)
+void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *value)
 {
   FILE *fp;
 
@@ -166,10 +173,6 @@ void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *
   fscanf(fp, "%s", filename);
   fscanf(fp, "%f", value);
 
-  time_t ltime;
-  time(&ltime);
-  float ftime = (float)ltime;
-  *curtime = ftime;//1235713769
   fclose(fp);
 }
 
@@ -179,8 +182,8 @@ int main(void)
   int port;
   float time, value;
 
-  getargs_cp(myname, hostname, &port, filename, &time, &value);
-  userTask(myname, hostname, port, filename, time, value);
+  getargs_cp(myname, hostname, &port, filename, &value);
+  userTask(myname, hostname, port, filename, value);
 
   return (0);
 }
