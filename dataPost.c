@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <unistd.h>
+#include <time.h>
 #include "/usr/include/mysql/mysql.h"
 #define _CRT_SECURE_NO_WARNINGS
 #define FIFO "./fifo"
@@ -81,9 +82,12 @@ int main(int argc, char *argv[])
   char *tempT = NULL;
   char *tempV = NULL;
   char *name = NULL;
-  float time;
+  float rtime;
+  int utime;
   float value;
   char query[255];
+  time_t ltime = time(NULL);
+  float curtime = (float)ltime;//1235713769
   
   MYSQL *dbfd;
   MYSQL_RES *res;
@@ -95,16 +99,7 @@ int main(int argc, char *argv[])
   mysqlD.password = "mysql1234";//pw
   mysqlD.database = "sensorDB";//db name
 
-  read(STDIN_FILENO, astr, MAXBUF);
-
-  printf("HTTP/1.0 200 OK\r\n");
-  printf("Server: My Web Server\r\n");
-  printf("Content-Length: %d\r\n", strlen(astr));
-  printf("Content-Type: text/plain\r\n\r\n");
-  printf(astr);
-  printf("\n");
-  
-  
+  read(STDIN_FILENO, astr, MAXBUF);  
 
   //인자 자르기
   
@@ -114,11 +109,16 @@ int main(int argc, char *argv[])
   
   temp = strtok(NULL, "=");
   temp = strtok(NULL, "&");
-  time = atof(temp);
+  rtime = atof(temp);
 
   temp = strtok(NULL, "=");
   temp = strtok(NULL, "&");
   value = atof(temp);
+
+  temp = strtok(NULL, "=");
+  temp = strtok(NULL, "&");
+  utime = atof(temp);
+
 
   //
   //printf("%s %f %f\n", name, time, value);
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
   //
 
   //센서db에 저장
-  sprintf(query, "INSERT INTO %s(time, value, idx) VALUES(%f, %f, null)", name, time, value);
+  sprintf(query, "INSERT INTO %s(time, value, idx) VALUES(%f, %f, null)", name, rtime, value);
   res = mysql_perform_query(dbfd, query);
   mysql_free_result(res);
   //
@@ -180,9 +180,21 @@ int main(int argc, char *argv[])
   mysql_close(dbfd);
   //
 
-  char msg[255];
-  sprintf(msg, "name=%s&time=%f&value=%f", name, time, value);
+  char timemsg[MAXLINE];
+  struct timeval endTime;
+  gettimeofday( &endTime, NULL );
+  sprintf(timemsg, "%02d", endTime.tv_usec-utime);
+
+  printf("HTTP/1.0 200 OK\r\n");
+  printf("Server: My Web Server\r\n");
+  printf("Content-Length: %d\r\n", strlen(timemsg));
+  printf("Content-Type: text/plain\r\n\r\n");
+  printf(timemsg);
+  printf("\n");
   fflush(stdout);
+
+  char msg[255];
+  sprintf(msg, "name=%s&time=%f&value=%f", name, rtime, value); 
   alarmClient(msg);
   return(0);
 }

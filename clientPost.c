@@ -33,6 +33,27 @@ void clientSend(int fd, char *filename, char *body)
   Rio_writen(fd, buf, strlen(buf));
 }
 
+typedef struct sendData 
+{
+  char *hostname;
+  int port;
+  char *filename;
+  char *msg;
+}sendData;//pthread 전송용
+
+void thread_task(void *data){
+  sendData *send = (sendData*)data;
+  struct timeval uTime;
+  gettimeofday( &uTime, NULL );
+  char msg[MAXLINE];
+  sprintf(msg, "%s&utime=%02d", send->msg,uTime.tv_usec);
+  int clientfd = Open_clientfd(send->hostname, send->port);
+  clientSend(clientfd, send->filename, msg);
+  clientPrint(clientfd);
+  Close(clientfd);
+  pthread_exit((void *)0);
+}
+
 /*
  * Read the HTTP response and print it out
  */
@@ -73,6 +94,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
   char input[MAXLINE];
   int n;
   int random;
+  int threadNum;
   srand(time(NULL));
 
   printf("if you want to see command, type 'help'\n");
@@ -153,11 +175,43 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
     {
       break;
     }
+    else if (!strncmp(input, "tsend", 5))
+    {
+      int result;
+      sscanf(input, "tsend %d", &threadNum);
+
+      time_t ltime = time(NULL);
+      float curtime = (float)ltime;//1235713769
+
+      sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
+
+      sendData data;
+      data.hostname = hostname;
+      data.port = port;
+      data.filename = filename;
+      data.msg = msg;
+
+
+      pthread_t *threadArr;
+      threadArr = (pthread_t*)malloc(sizeof(pthread_t)*threadNum);
+      for(int i = 0; i<threadNum; i++){
+        pthread_create(&threadArr[i], NULL, thread_task, (void*)&data);
+        //pthread_detach(threadArr[i]);
+        //pthread_join(threadArr[i], (void *)&result);
+      }
+
+      for(int i = 0; i<threadNum; i++){
+        //pthread_create(&threadArr[i], NULL, thread_task, (void*)data);
+        pthread_detach(threadArr[i]);
+        //pthread_join(threadArr[i], (void *)&result);
+      }
+    }
     if ( getchar() == EOF )
         break;   
   }
   Close(clientfd);
-}
+} 
+
 
 void getargs_cp(char *myname, char *hostname, int *port, char *filename, float *value)
 {
