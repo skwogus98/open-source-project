@@ -160,7 +160,7 @@ int checkData(char msg[], char *sensorName, float threshold, char sendmsg[])
       }
     }
   }
-  printf("temperature under\n");
+  //printf("temperature under\n");
   return 0; // 문제가 없을 시 alarmclient 종료
 }
 
