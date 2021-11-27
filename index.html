@@ -1,17 +1,65 @@
 <html>
-
 <head>
-  <title>Test Web Page</title>
+  <link rel="stylesheet" href= "css/style.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+      window.onload=()=>{
+
+      }
+
+      function mkSensorButton(){
+        $.get({
+          url:"/dataGet.cgi?command=LIST",
+          data:{dat : text},
+          success:function(dat){
+            console.log(dat)///추가해야함
+            //데이터 파싱
+
+            //요소 만들기
+            for(sensorName in arrary){
+              var sensorButton = document.createElement("button")
+              sensorButton.id = "sensorButton"
+              sensorButton.value = sensorName
+              //~~~.onclick=()=>{}
+              var sensorDiv = document.getElementsByClassName("sensorList")[0]
+              sensorDiv.appendChild(sensorButton)
+            }
+
+          }
+        })
+      }
+
+      function printData(sensorName){
+        var DataDiv = document.getElementsByClassName("sensorData")[0]
+        $.get("/dataGet.cgi?command=INFO&value=" + sensorName,
+          function(data){
+            console.log(data)
+          })
+        $.get("/dataGet.cgi?NAME=" + sensorName + "&N=10",
+          function(data){
+           console.log(data)
+        })
+      }
+
+      function checkAlarm(){
+        
+      }
+      
+  </script>
+
+
+  <title>server monitoring</title>
 </head>
 
 <body>
-
-<h2>Test Web Page</h2>
-
-<p> Test web page: Hello!</p>
-
-<p> First, try to acess web page as <a href="/">/</a>.
-
-<p> Next, try to access dynamic web page <a href="/test.html">/test.html</a>.
+  <div class="sensorList">
+    <p>asdf
+  </div>
+  <div class="sensorData">
+    <p>asdf</p>
+  </div>
+  <div class="alarm">
+    <p>asdf</p>
+  </div>
 </body>
 </html>
