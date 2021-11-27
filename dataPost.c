@@ -115,11 +115,6 @@ int main(int argc, char *argv[])
   temp = strtok(NULL, "&");
   value = atof(temp);
 
-  temp = strtok(NULL, "=");
-  temp = strtok(NULL, "&");
-  utime = atof(temp);
-
-
   //
   //printf("%s %f %f\n", name, time, value);
   //db연결
@@ -179,18 +174,7 @@ int main(int argc, char *argv[])
   //
   mysql_close(dbfd);
   //
-
-  char timemsg[MAXLINE];
-  struct timeval endTime;
-  gettimeofday( &endTime, NULL );
-  sprintf(timemsg, "%02d", endTime.tv_usec-utime);
-
-  printf("HTTP/1.0 200 OK\r\n");
-  printf("Server: My Web Server\r\n");
-  printf("Content-Length: %d\r\n", strlen(timemsg));
-  printf("Content-Type: text/plain\r\n\r\n");
-  printf(timemsg);
-  printf("\n");
+  
   fflush(stdout);
 
   char msg[255];

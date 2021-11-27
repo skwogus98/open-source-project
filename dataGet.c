@@ -181,13 +181,14 @@ void textReturn(void)
 
     while((row = mysql_fetch_row(res))){
       time_t timeGet = atoi(row[0]);
-      sprintf(content, "%s%s%s\n", content , ctime(&timeGet), row[0]);
+      sprintf(content, "%s%s%s\n", content , ctime(&timeGet), row[1]);
     }
   }
   mysql_close(dbfd);
   
   /* Generate the HTTP response */
-  
+  printf("HTTP/1.0 200 OK\r\n");
+  printf("Server: My Web Server\r\n");
   printf("Content-Length: %d\n", strlen(content));
   printf("Content-Type: text/plain\r\n\r\n");
   printf("%s", content);

@@ -1,50 +1,118 @@
-<html>
+<html lang="ko">
 <head>
+  <meta charset="utf-8">
   <link rel="stylesheet" href= "css/style.css">
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+  <!--https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/-->
   <script>
-      window.onload=()=>{
+    var sensorName = ""
+    window.onload=()=>{
+      mkSensorButton()
+    }
 
-      }
-
-      function mkSensorButton(){
-        $.get({
-          url:"/dataGet.cgi?command=LIST",
-          data:{dat : text},
-          success:function(dat){
-            console.log(dat)///추가해야함
-            //데이터 파싱
-
-            //요소 만들기
-            for(sensorName in arrary){
+    function mkSensorButton(){
+      $.get("/dataGet.cgi?command=LIST",
+        function(dat){
+          //데이터 파싱
+          if(dat == ""){
+            document.getElementsByClassName("sensorList")[0].innerHTML = "데이터가 존재하지 않습니다."
+          }
+          else{
+            sensorArray = dat.split('\n')
+            sensorArray.forEach(function(sName){
               var sensorButton = document.createElement("button")
               sensorButton.id = "sensorButton"
-              sensorButton.value = sensorName
-              //~~~.onclick=()=>{}
+              sensorButton.innerText = sName
+              sensorButton.addEventListener("click", function(){
+                sensorName = sName
+                printData()
+              })
               var sensorDiv = document.getElementsByClassName("sensorList")[0]
-              sensorDiv.appendChild(sensorButton)
-            }
-
+              if(sName != ""){
+                sensorDiv.appendChild(sensorButton)
+              }
+            })
           }
-        })
-      }
+          //요소 만들기
+        }
+      )
+    }
 
-      function printData(sensorName){
-        var DataDiv = document.getElementsByClassName("sensorData")[0]
-        $.get("/dataGet.cgi?command=INFO&value=" + sensorName,
-          function(data){
-            console.log(data)
+    function printData(){
+      //기존 print 내용 지우기
+      var d = document.querySelector('div.sensorData');
+      var deldiv = d.querySelectorAll("div");
+      Array.prototype.forEach.call(deldiv, function(node){
+          node.parentNode.removeChild(node);
+      })
+
+      //console.log(sensorName)
+      var DataDiv = document.getElementsByClassName("sensorData")[0]
+      $.get("/dataGet.cgi?NAME=" + sensorName + "&N=10",
+        function(data){
+          var sensorDat = data.split('\n')
+          var n = 1
+          var values = []
+          var times = []
+          sensorDat.forEach(function(dat){
+            if(dat!=""){
+              if((n%2) == 0){
+                values.push(dat)
+              }
+              else{
+                if(dat.split(" ")[2]==0){
+                  times.push(dat.split(" ")[4])  
+                }
+                else{
+                  times.push(dat.split(" ")[3])
+                }
+              }
+              n = n + 1
+            }
           })
-        $.get("/dataGet.cgi?NAME=" + sensorName + "&N=10",
-          function(data){
-           console.log(data)
+          
+          new Chart(document.getElementById("line-chart"), {
+            type: 'line',
+            data: {
+              labels: times,
+              datasets: [{ 
+                  data: values,
+                  label: sensorName,
+                  borderColor: "#3e95cd",
+                  fill: false
+                }]
+            },
+            options: {
+              title: {
+                display: true,
+                text: '최근 ' + sensorName + "센서 기록"
+              }
+            }
+          })
+      })
+      $.get("/dataGet.cgi?command=INFO&value=" + sensorName,
+        function(data){
+          var sensorInfo = document.createElement("div")
+          sensorInfo.className = "sensorInfo"
+          var info = data.split(' ')
+          sensorInfo.innerHTML = "데이터의 수: "+ info[0] +"<br>" + "평균: "+ info[1] +"<br>" + "최고 수치: "+ info[2] +"<br>"
+          var sensorDiv = document.getElementsByClassName("sensorData")[0]
+          sensorDiv.appendChild(sensorInfo)
         })
-      }
+      var oldsname = sensorName
+      setTimeout(function() {
+        if(oldsname == sensorName){
+          printData();
+        }
+      }, 3000)
+    }
 
-      function checkAlarm(){
-        
-      }
-      
+    function checkAlarm(){
+      //config-pc.txt
+    }
+
+  
   </script>
 
 
@@ -52,14 +120,17 @@
 </head>
 
 <body>
-  <div class="sensorList">
-    <p>asdf
-  </div>
-  <div class="sensorData">
-    <p>asdf</p>
-  </div>
-  <div class="alarm">
-    <p>asdf</p>
+  <div class="main">
+    <div class="content">
+      <div class="sensorList">
+      </div>
+      <div class="sensorData">
+        <canvas id="line-chart" width="800" height="450"></canvas>
+      </div>
+      <div class="alarm">
+        <p></p>
+      </div>
+    </div>
   </div>
 </body>
 </html>
