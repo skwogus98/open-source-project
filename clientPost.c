@@ -93,8 +93,10 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
   char msg[MAXLINE];
   char input[MAXLINE];
   int n;
+  char newValue[MAXLINE];
   int random;
   int threadNum;
+  time_t ltime;
   srand(time(NULL));
 
   printf("if you want to see command, type 'help'\n");
@@ -137,16 +139,16 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
       else
       {
         printf("%s\n", input);
-        sscanf(input, "value %s", n);
-        value = atof(n);
-        printf("Sensor name is changed to '%s'\n", value);
+        sscanf(input, "value %s", newValue);
+        value = atof(newValue);
+        printf("Sensor name is changed to '%f'\n", value);
       }
     }
     else if (!strcmp(input, "send"))
     {
       time_t ltime = time(NULL);
       //time(&ltime);
-      float curtime = (float)ltime;//1235713769
+      double curtime = (double)ltime;//1235713769
 
       sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
       clientfd = Open_clientfd(hostname, port);
@@ -159,8 +161,8 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
 
       for (int i = 0; i < n; i++)
       {
-        time_t ltime = time(NULL);
-        float curtime = (float)ltime;//1235713769
+        ltime = time(NULL);
+        double curtime = (double)ltime;//1235713769
 
         random = rand() % 21 - 10;
         value += random;
@@ -168,7 +170,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
         clientfd = Open_clientfd(hostname, port);
         clientSend(clientfd, filename, msg);
         clientPrint(clientfd);
-        sleep(1);
+        sleep(5);
       }
     }
     else if (!strcmp(input, "quit"))

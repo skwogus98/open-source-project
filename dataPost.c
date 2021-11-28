@@ -82,12 +82,10 @@ int main(int argc, char *argv[])
   char *tempT = NULL;
   char *tempV = NULL;
   char *name = NULL;
-  float rtime;
+  double rtime;
   int utime;
   float value;
   char query[255];
-  time_t ltime = time(NULL);
-  float curtime = (float)ltime;//1235713769
   
   MYSQL *dbfd;
   MYSQL_RES *res;
@@ -135,7 +133,7 @@ int main(int argc, char *argv[])
 
       //새로운 테이블 생성
       
-      sprintf(query, "CREATE TABLE IF NOT EXISTS `%s` (`idx` INT NOT NULL auto_increment, `time` FLOAT NULL, `value` FLOAT NULL, PRIMARY KEY (`idx`))ENGINE = InnoDB  DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci;", name);
+      sprintf(query, "CREATE TABLE IF NOT EXISTS `%s` (`idx` INT NOT NULL auto_increment, `time` DOUBLE NULL, `value` FLOAT NULL, PRIMARY KEY (`idx`))ENGINE = InnoDB  DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci;", name);
       res = mysql_perform_query(dbfd, query);
   }
   mysql_free_result(res);

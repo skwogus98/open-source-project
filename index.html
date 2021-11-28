@@ -4,11 +4,12 @@
   <link rel="stylesheet" href= "css/style.css">
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-  <!--https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/-->
+  <!-- https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/ -->
   <script>
     var sensorName = ""
     window.onload=()=>{
       mkSensorButton()
+      checkAlarm()
     }
 
     function mkSensorButton(){
@@ -49,23 +50,41 @@
 
       //console.log(sensorName)
       var DataDiv = document.getElementsByClassName("sensorData")[0]
-      $.get("/dataGet.cgi?NAME=" + sensorName + "&N=10",
+
+      var ave, max
+      $.get("/dataGet.cgi?command=INFO&value=" + sensorName,
+        function(data){
+          var info = data.split(' ')/*
+          var sensorInfo = document.createElement("div")
+          sensorInfo.className = "sensorInfo"
+          sensorInfo.innerHTML = "데이터의 수: "+ info[0] +"<br>" + "평균: "+ info[1] +"<br>" + "최고 수치: "+ info[2] +"<br>"
+          var sensorDiv = document.getElementsByClassName("sensorData")[0]
+          sensorDiv.appendChild(sensorInfo)*/
+          ave = info[1]
+          max = info[2]
+        })
+
+      $.get("/dataGet.cgi?NAME=" + sensorName + "&N=20",
         function(data){
           var sensorDat = data.split('\n')
           var n = 1
           var values = []
           var times = []
+          var maxs = []
+          var aves = []
           sensorDat.forEach(function(dat){
             if(dat!=""){
               if((n%2) == 0){
-                values.push(dat)
+                values.unshift(dat)
+                maxs.unshift(max)
+                aves.unshift(ave)
               }
               else{
                 if(dat.split(" ")[2]==0){
-                  times.push(dat.split(" ")[4])  
+                  times.unshift(dat.split(" ")[4])
                 }
                 else{
-                  times.push(dat.split(" ")[3])
+                  times.unshift(dat.split(" ")[3])
                 }
               }
               n = n + 1
@@ -77,29 +96,43 @@
             data: {
               labels: times,
               datasets: [{ 
-                  data: values,
-                  label: sensorName,
-                  borderColor: "#3e95cd",
-                  fill: false
-                }]
+                data: values,
+                label: sensorName,
+                borderColor: "#3e95cd",
+                fill: false
+              }, { 
+                data: maxs,
+                label: "최대 값",
+                borderColor: "#c45850",
+                fill: false
+              }, { 
+                data: aves,
+                label: "평균",
+                borderColor: "#3cba9f",
+                fill: false
+              }]
             },
             options: {
               title: {
                 display: true,
-                text: '최근 ' + sensorName + "센서 기록"
+                text: '최근 ' + sensorName + "센서 기록",
+                scales:{
+                  responsive: false,
+                  scales: {
+                    yAxes: [{
+                      ticks: {
+                        min : 0,
+                        max : 50,
+                        fontSize : 14,
+                        stepSize : 3,
+                      }
+                    }]
+                  }
+                }
               }
             }
           })
       })
-      $.get("/dataGet.cgi?command=INFO&value=" + sensorName,
-        function(data){
-          var sensorInfo = document.createElement("div")
-          sensorInfo.className = "sensorInfo"
-          var info = data.split(' ')
-          sensorInfo.innerHTML = "데이터의 수: "+ info[0] +"<br>" + "평균: "+ info[1] +"<br>" + "최고 수치: "+ info[2] +"<br>"
-          var sensorDiv = document.getElementsByClassName("sensorData")[0]
-          sensorDiv.appendChild(sensorInfo)
-        })
       var oldsname = sensorName
       setTimeout(function() {
         if(oldsname == sensorName){
@@ -109,7 +142,55 @@
     }
 
     function checkAlarm(){
-      //config-pc.txt
+      $.get("/dataGet.cgi?NAME=temperature&N=20",
+        function(data){
+          var sensorDat = data.split('\n')
+          var n = 1
+          var values = ""
+          var times = ""
+          var limit = 27
+          var checkNum = 0
+          sensorDat.forEach(function(dat){
+            if(dat!=""){
+              if((n%2) == 0){
+                if(Number(dat)>27){
+                  if(values==""){
+                    values += dat
+                  }
+                  else{
+                    values  = values + ", " + dat
+                  }
+                  checkNum = 1
+                }
+              }
+              else{
+                var time
+                if(dat.split(" ")[2]==0){
+                  time = dat.split(" ")[4]
+                }
+                else{
+                  time = dat.split(" ")[3]
+                }
+                if(checkNum==1){
+                  if(times==""){
+                    times += time
+                  }
+                  else{
+                    times  = times + ", " + time
+                  }
+                  checkNum = 0
+                }
+                //console.log(time)
+              }
+              n = n + 1
+            }
+          })
+          var alarmMsg = "경고 : temperature sensor로부터 " + times + " 시각에 " + values + "라는 값이 발생했습니다."
+          document.getElementsByClassName("alarm")[0].innerHTML = alarmMsg
+        })
+        setTimeout(function() {
+          checkAlarm()
+        }, 3000)
     }
 
   
@@ -128,7 +209,6 @@
         <canvas id="line-chart" width="800" height="450"></canvas>
       </div>
       <div class="alarm">
-        <p></p>
       </div>
     </div>
   </div>

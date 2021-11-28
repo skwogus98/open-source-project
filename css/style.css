@@ -25,6 +25,11 @@ div.sensorInfo {
   text-align: left;
 }
 
+div.alarm {
+  border: 1px solid black;
+  color: red;
+}
+
 /* https://www.daleseo.com/css-buttons/ */
 button{
   -webkit-appearance: none;
