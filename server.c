@@ -119,19 +119,15 @@ void producer(void * listenfd){
 //connfd
 void consumer(void *i)
 {
-  //while(1)
-  {
-    //printf("consumer %d: %d\n", *(int*)i,  reqQueue->count);
-    sem_wait(&sem);
-    
-    if(!isEmpty(reqQueue)){
-      int connfd = dequeue(reqQueue);
-      requestHandle(connfd, getWatch());
-      Close(connfd);
-    }
-    
-    sem_post(&sem);
+  sem_wait(&sem);
+  
+  if(!isEmpty(reqQueue)){
+    int connfd = dequeue(reqQueue);
+    requestHandle(connfd, getWatch());
+    Close(connfd);
   }
+  
+  sem_post(&sem);
   pthread_exit((void *)0);
 }
 
@@ -160,43 +156,13 @@ int main(void)
       perror("thread create error : ");
       exit(0);
     }
-    //pthread_detach(thProducer);
     pthread_join(thProducer, (void *)&result);
     
     thConsumers = (pthread_t*)malloc(sizeof(pthread_t)*poolSize);
     for(int i = 0; i<poolSize; i++){
       pthread_create(&thConsumers[i], NULL, consumer, (void*)&(i));
       pthread_detach(thConsumers[i]);
-      //pthread_join(thConsumers[i], (void *)&result);
     }
   }
-  /*
-  while (1) {
-    clientlen = sizeof(clientaddr);
-    connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *) &clientlen);
-    consumer(connfd, getWatch());
-  }*/
-
-/*
-    int thr_id;
-    
-    int a = 1;
-    int b = 2;
-    int c = 3;
-    pthread_t *p_threadArr;
-    
-    thr_id = pthread_create(&p_thread, NULL, hello, NULL);
-    if (thr_id < 0)
-    {
-        perror("thread create error : ");
-        exit(0);
-    }
-    p_threadArr = malloc(sizeof(pthread_t)*3);
-    // 쓰레드 식별자 p_thread 가 종료되길 기다렸다가 
-    // 종료후에 리턴값을 받아옵니다. 
-    
-    pthread_join(p_thread, (void *)&result);
-    printf("thread join : %d\n", result);
-    */
   return(0);
 }

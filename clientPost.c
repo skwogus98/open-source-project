@@ -183,7 +183,7 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
       sscanf(input, "tsend %d", &threadNum);
 
       time_t ltime = time(NULL);
-      float curtime = (float)ltime;//1235713769
+      float curtime = (float)ltime;
 
       sprintf(msg, "name=%s&time=%f&value=%f", myname, curtime, value);
 
@@ -193,19 +193,14 @@ void userTask(char *myname, char *hostname, int port, char *filename, float valu
       data.filename = filename;
       data.msg = msg;
 
-
       pthread_t *threadArr;
       threadArr = (pthread_t*)malloc(sizeof(pthread_t)*threadNum);
       for(int i = 0; i<threadNum; i++){
         pthread_create(&threadArr[i], NULL, thread_task, (void*)&data);
-        //pthread_detach(threadArr[i]);
-        //pthread_join(threadArr[i], (void *)&result);
       }
 
       for(int i = 0; i<threadNum; i++){
-        //pthread_create(&threadArr[i], NULL, thread_task, (void*)data);
         pthread_detach(threadArr[i]);
-        //pthread_join(threadArr[i], (void *)&result);
       }
     }
     if ( getchar() == EOF )

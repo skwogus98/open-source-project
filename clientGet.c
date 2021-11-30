@@ -89,6 +89,14 @@ void userTask(char hostname[], int port, char webaddr[])
       clientSend(clientfd, webaddr);
       clientPrint(clientfd);
     }
+     else if(!strncmp(input, "HELP", 4)){
+      printf(" HELP             : list available commands. \n");
+      printf(" LIST             : print list of sensors. \n");
+      printf(" INFO <sname>     : print data of sensor <sname>. \n");
+      printf(" GET <sname>      : recent(time,value) print of sensor <sname>. \n");
+      printf(" GET <sname ><n>  : recent(time,value) <n> print of sensor <sname>. \n");
+      printf(" quit             : quit the program. \n");
+    }
     else if (!strncmp(input, "INFO", 4))
     {
       sscanf(input, "INFO %s", sname);

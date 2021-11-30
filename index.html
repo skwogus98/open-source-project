@@ -15,7 +15,6 @@
     function mkSensorButton(){
       $.get("/dataGet.cgi?command=LIST",
         function(dat){
-          //데이터 파싱
           if(dat == ""){
             document.getElementsByClassName("sensorList")[0].innerHTML = "데이터가 존재하지 않습니다."
           }
@@ -35,31 +34,15 @@
               }
             })
           }
-          //요소 만들기
         }
       )
     }
 
     function printData(){
-      //기존 print 내용 지우기
-      var d = document.querySelector('div.sensorData');
-      var deldiv = d.querySelectorAll("div");
-      Array.prototype.forEach.call(deldiv, function(node){
-          node.parentNode.removeChild(node);
-      })
-
-      //console.log(sensorName)
-      var DataDiv = document.getElementsByClassName("sensorData")[0]
-
       var ave, max
       $.get("/dataGet.cgi?command=INFO&value=" + sensorName,
         function(data){
-          var info = data.split(' ')/*
-          var sensorInfo = document.createElement("div")
-          sensorInfo.className = "sensorInfo"
-          sensorInfo.innerHTML = "데이터의 수: "+ info[0] +"<br>" + "평균: "+ info[1] +"<br>" + "최고 수치: "+ info[2] +"<br>"
-          var sensorDiv = document.getElementsByClassName("sensorData")[0]
-          sensorDiv.appendChild(sensorInfo)*/
+          var info = data.split(' ')
           ave = info[1]
           max = info[2]
         })
@@ -116,19 +99,6 @@
               title: {
                 display: true,
                 text: '최근 ' + sensorName + "센서 기록",
-                scales:{
-                  responsive: false,
-                  scales: {
-                    yAxes: [{
-                      ticks: {
-                        min : 0,
-                        max : 50,
-                        fontSize : 14,
-                        stepSize : 3,
-                      }
-                    }]
-                  }
-                }
               }
             }
           })
@@ -192,11 +162,7 @@
           checkAlarm()
         }, 3000)
     }
-
-  
   </script>
-
-
   <title>server monitoring</title>
 </head>
 
