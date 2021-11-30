@@ -1,24 +1,33 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap");
+div{
+  border-radius: 10px 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: rgba(255, 255, 255, 0.7)
+}
 
 div.main{
   text-align: center;
+  background-color: transparent !important;
 }
 div.content{
   display: inline-block;
+  background-color: rgba(152,206,00,0.5);
+  padding: 10px;
 }
 
 div.sensorList {
-  border: 1px solid black;
+
   width: 1200px;
+  text-align: left;
 }
 
 div.sensorData {
-  border: 1px solid black;
   width: 1200px;
 }
 
 div.sensorInfo {
-  border: 1px solid black;
+
   margin: 10;
   padding: 0.5rem;
   width:fit-content;
@@ -26,7 +35,6 @@ div.sensorInfo {
 }
 
 div.alarm {
-  border: 1px solid black;
   color: red;
 }
 
