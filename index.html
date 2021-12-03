@@ -155,7 +155,9 @@
               n = n + 1
             }
           })
-          var alarmMsg = "경고 : temperature sensor로부터 " + times + " 시각에 " + values + "라는 값이 발생했습니다."
+          if(values!=""){
+            var alarmMsg = "경고 : temperature sensor로부터 " + times + " 시각에 " + values + "라는 값이 발생했습니다."
+          }
           document.getElementsByClassName("alarm")[0].innerHTML = alarmMsg
         })
         setTimeout(function() {
